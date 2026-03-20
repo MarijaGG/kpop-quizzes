@@ -1,16 +1,18 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container max-w-6xl mx-auto">
-    <div class="mb-4">
-        <a href="{{ route('admin.index') }}" class="px-3 py-2 bg-gray-100 border rounded hover:bg-gray-200">← Admin</a>
-    </div>
-    <div class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
-        <h2 class="text-xl font-semibold mb-4">Edit Member</h2>
+<div class="page-container">
+    <div class="page-inner max-w-6xl mx-auto">
+        <div class="mb-4 flex items-center justify-between">
+            <a href="{{ route('admin.members.index') }}" class="back-button">← Members</a>
+        </div>
 
-        <form method="post" action="{{ route('admin.members.update', $member->id) }}" enctype="multipart/form-data">
-        @csrf
-        @method('PUT')
+        <div class="card">
+            <h2 class="text-xl font-semibold mb-4">Edit Member</h2>
+
+            <form method="post" action="{{ route('admin.members.update', $member->id) }}" enctype="multipart/form-data">
+            @csrf
+            @method('PUT')
 
         <div class="mb-3">
             <label class="form-label">Image</label>
@@ -24,7 +26,7 @@
             <label class="form-label">Group</label>
             <select name="group_id" class="form-control" required>
                 @foreach($groups as $g)
-                    <option value="{{ $g->id }}" {{ $g->id === $member->group_id ? 'selected' : '' }}>{{ $g->name }}</option>
+                    <option value="{{ $g->id }}" {{ (string)$g->id === (string)($member->group_id ?? '') ? 'selected' : '' }}>{{ $g->name }}</option>
                 @endforeach
             </select>
         </div>
@@ -52,7 +54,9 @@
             <textarea name="description" class="form-control">{{ old('description', $member->description) }}</textarea>
         </div>
 
-        <button class="btn btn-primary">Update Member</button>
-    </form>
+                <button class="btn btn-primary">Update Member</button>
+            </form>
+        </div>
+    </div>
 </div>
 @endsection

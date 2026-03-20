@@ -1,12 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container max-w-6xl mx-auto">
-    <div class="mb-4 flex items-center justify-between">
-        <a href="{{ route('admin.index') }}" class="px-3 py-2 bg-gray-100 border rounded hover:bg-gray-200">← Admin</a>
-    </div>
-    <div class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
-        <h2 class="text-xl font-semibold mb-4">Questions for: {{ $quiz->name ?? 'Quiz' }}</h2>
+<div class="page-container">
+    <div class="page-inner max-w-6xl mx-auto">
+        <div class="mb-4 flex items-center justify-between">
+            <a href="{{ route('admin.index') }}" class="back-button">← Admin</a>
+            <a href="{{ route('admin.quizzes.questions.create', $quiz->id ?? request()->segment(3)) }}" class="btn btn-primary">New</a>
+        </div>
+        <div class="card">
+            <h2 class="text-xl font-semibold mb-4">Questions for: {{ $quiz->name ?? 'Quiz' }}</h2>
 
     <table class="table">
         <thead>

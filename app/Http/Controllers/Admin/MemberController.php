@@ -15,12 +15,20 @@ class MemberController extends BaseAdminController
         $json = json_decode(file_get_contents(resource_path('data/api.json')), true) ?? [];
         $all = $json['members'] ?? [];
 
+        // optional group filter from query string
+        $groupId = request('group_id');
+        if (! empty($groupId)) {
+            $all = array_values(array_filter($all, function($m) use ($groupId) {
+                return (string)($m['group_id'] ?? '') === (string)$groupId;
+            }));
+        }
+
         $page = (int) request('page', 1);
         $perPage = 20;
         $total = count($all);
         $items = array_slice($all, ($page - 1) * $perPage, $perPage);
         $items = array_map(function($i){ return (object)$i; }, $items);
-        $members = new LengthAwarePaginator($items, $total, $perPage, $page, ['path' => url()->current()]);
+        $members = new LengthAwarePaginator($items, $total, $perPage, $page, ['path' => url()->current(), 'query' => request()->query()]);
         return view('admin.members.index', compact('members'));
     }
 

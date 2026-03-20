@@ -1,12 +1,18 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <h2>Edit Quiz</h2>
+<div class="page-container">
+    <div class="page-inner max-w-6xl mx-auto">
+        <div class="mb-4 flex items-center justify-between">
+            <a href="{{ route('admin.quizzes.index') }}" class="back-button">← Quizzes</a>
+        </div>
 
-    <form method="post" action="{{ route('admin.quizzes.update', $quiz->id) }}" enctype="multipart/form-data">
-        @csrf
-        @method('PUT')
+        <div class="card">
+            <h2>Edit Quiz</h2>
+
+            <form method="post" action="{{ route('admin.quizzes.update', $quiz->id) }}" enctype="multipart/form-data">
+                @csrf
+                @method('PUT')
 
         <div class="mb-3">
             <label class="form-label">Image</label>
@@ -54,7 +60,9 @@
             </div>
         @endfor
 
-        <button class="btn btn-primary">Update Quiz & Questions</button>
-    </form>
+                <button class="btn btn-primary">Update Quiz & Questions</button>
+            </form>
+        </div>
+    </div>
 </div>
 @endsection

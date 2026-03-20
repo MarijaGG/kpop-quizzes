@@ -24,12 +24,36 @@ class QuestionController extends BaseAdminController
         return view('admin.questions.index', ['questions' => $p, 'quiz' => $quiz]);
     }
 
+    public function create($quizId)
+    {
+        $json = json_decode(file_get_contents(resource_path('data/api.json')), true) ?? [];
+        $questions = $json['questions'] ?? [];
+        $ids = array_column($questions, 'id');
+        $max = count($ids) ? max($ids) : 0;
+        $newId = $max + 1;
+        $questions[] = [
+            'id' => $newId,
+            'quiz_id' => (int)$quizId,
+            'text' => '',
+            'order' => count($questions) + 1,
+        ];
+        $json['questions'] = $questions;
+        file_put_contents(resource_path('data/api.json'), json_encode($json, JSON_PRETTY_PRINT));
+
+        return redirect()->route('admin.quizzes.questions.edit', [$quizId, $newId]);
+    }
+
     public function edit($quizId, $questionId)
     {
         $json = json_decode(file_get_contents(resource_path('data/api.json')), true) ?? [];
         $question = null;
         foreach ($json['questions'] ?? [] as $q) { if ((string)($q['id'] ?? '') === (string)$questionId) { $question = (object)$q; break; } }
         $answers = array_values(array_filter($json['answers'] ?? [], function($a) use ($questionId){ return (string)($a['question_id'] ?? '') === (string)$questionId; }));
+        // legacy data: some answer rows reference old question IDs (1..n) matching the question's order
+        if (empty($answers) && $question && isset($question->order)) {
+            $legacyId = (string)$question->order;
+            $answers = array_values(array_filter($json['answers'] ?? [], function($a) use ($legacyId){ return (string)($a['question_id'] ?? '') === $legacyId; }));
+        }
         $answers = array_map(function($i){ return (object)$i; }, $answers);
         // normalize legacy counters/member_id into target_type/target_id when possible
         foreach ($answers as $idx => $ans) {

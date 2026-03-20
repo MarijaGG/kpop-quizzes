@@ -24,6 +24,14 @@ class QuizController extends BaseAdminController
         $membersById = [];
         foreach ($members as $m) { $membersById[$m['id']] = (object)$m; }
 
+        // optional group filter
+        $groupId = request('group_id');
+        if (! empty($groupId)) {
+            $all = array_values(array_filter($all, function($q) use ($groupId) {
+                return (string)($q['group_id'] ?? '') === (string)$groupId;
+            }));
+        }
+
         $page = (int) request('page', 1);
         $perPage = 20;
         $total = count($all);
@@ -36,7 +44,7 @@ class QuizController extends BaseAdminController
             $i['member'] = $membersById[$i['member_id'] ?? null] ?? null;
             return (object)$i;
         }, $items);
-        $quizzes = new LengthAwarePaginator($items, $total, $perPage, $page, ['path' => url()->current()]);
+        $quizzes = new LengthAwarePaginator($items, $total, $perPage, $page, ['path' => url()->current(), 'query' => request()->query()]);
         return view('admin.quizzes.index', compact('quizzes'));
     }
 

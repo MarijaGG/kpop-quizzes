@@ -1,18 +1,20 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container max-w-6xl mx-auto">
-    <div class="mb-4 flex items-center justify-between">
-        <a href="{{ route('admin.index') }}" class="px-3 py-2 bg-gray-100 border rounded hover:bg-gray-200">← Admin</a>
-    </div>
-    <div class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
-        <h2 class="text-xl font-semibold mb-2">Manage Answers for Question</h2>
-        <p class="text-sm text-gray-600 mb-4">{{ $question->text ?? '' }}</p>
+<div class="page-container">
+    <div class="page-inner max-w-6xl mx-auto">
+        <div class="mb-4 flex items-center justify-between">
+            <a href="{{ route('admin.quizzes.questions.index', $quiz_id) }}" class="back-button">← Questions</a>
+        </div>
 
-        <form method="post" action="{{ route('admin.quizzes.questions.update', [$quiz_id, $question->id]) }}" class="max-w-3xl mx-auto">
-        @csrf
+        <div class="card">
+            <h2 class="text-xl font-semibold mb-2">Manage Answers for Question</h2>
+            <p class="text-sm text-gray-600 mb-4">{{ $question->text ?? '' }}</p>
 
-        <h5>Answers (up to 8)</h5>
+            <form method="post" action="{{ route('admin.quizzes.questions.update', [$quiz_id, $question->id]) }}" class="max-w-3xl mx-auto">
+            @csrf
+
+            <h5>Answers (up to 8)</h5>
 
         <div class="mb-3">
             <label class="form-label">Question target type</label>
@@ -64,8 +66,10 @@
             </div>
         @endfor
 
-        <button class="btn btn-primary">Save Answers</button>
-    </form>
+                <button class="btn btn-primary">Save Answers</button>
+            </form>
+        </div>
+    </div>
 </div>
 
 <script>

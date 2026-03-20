@@ -1,18 +1,20 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container max-w-6xl mx-auto">
-    <div class="mb-4">
-        <a href="{{ route('admin.index') }}" class="px-3 py-2 bg-gray-100 border rounded hover:bg-gray-200">← Admin</a>
-    </div>
-    <div class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
-        <h2 class="text-xl font-semibold mb-4">Create Album</h2>
+<div class="page-container">
+    <div class="page-inner max-w-6xl mx-auto">
+        <div class="mb-4 flex items-center justify-between">
+            <a href="{{ route('admin.albums.index') }}" class="back-button">← Albums</a>
+        </div>
 
-        <form method="post" action="{{ route('admin.albums.store') }}" enctype="multipart/form-data">
-        @csrf
+        <div class="card">
+            <h2 class="text-xl font-semibold mb-4">Create Album</h2>
+
+            <form method="post" action="{{ route('admin.albums.store') }}" enctype="multipart/form-data">
+            @csrf
         <div class="mb-3">
             <label class="form-label">Image</label>
-            <input type="file" name="image" class="form-control" accept="image/*" />
+            <input type="file" name="image" class="form-control" accept="image/*" required />
         </div>
         <div class="mb-3">
             <label class="form-label">Group</label>
@@ -48,7 +50,19 @@
             <textarea name="description" class="form-control"></textarea>
         </div>
 
-        <button class="btn btn-primary">Create Album</button>
-    </form>
+            <button class="btn btn-primary" type="submit">Create Album</button>
+            </form>
+        </div>
+    </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    var form = document.querySelector('form[enctype="multipart/form-data"]');
+    if (!form) return;
+    var file = form.querySelector('input[type="file"][name="image"]');
+    var btn = form.querySelector('button[type="submit"], button.btn-primary');
+    function update(){ if (btn) btn.disabled = !file || !file.value; }
+    if (file) { file.addEventListener('change', update); update(); }
+});
+</script>
 @endsection

@@ -22,10 +22,11 @@
                         <a href="{{ route('admin.index') }}">Admin panel</a>
                     </div>
                 @endif
+                @auth
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="dropdown-trigger">
-                            <div>{{ Auth::user()->name }}</div>
+                            <div>{{ auth()->user()->name ?? auth()->user()->email }}</div>
 
                             <div class="ms-1">
                                 <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -52,6 +53,7 @@
                         </form>
                     </x-slot>
                 </x-dropdown>
+                @endauth
             </div>
         </div>
     </div>

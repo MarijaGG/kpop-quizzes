@@ -15,12 +15,20 @@ class AlbumController extends BaseAdminController
         $json = json_decode(file_get_contents(resource_path('data/api.json')), true) ?? [];
         $all = $json['albums'] ?? [];
 
+        // optional group filter
+        $groupId = request('group_id');
+        if (! empty($groupId)) {
+            $all = array_values(array_filter($all, function($a) use ($groupId) {
+                return (string)($a['group_id'] ?? '') === (string)$groupId;
+            }));
+        }
+
         $page = (int) request('page', 1);
         $perPage = 20;
         $total = count($all);
         $items = array_slice($all, ($page - 1) * $perPage, $perPage);
         $items = array_map(function($i){ return (object)$i; }, $items);
-        $albums = new LengthAwarePaginator($items, $total, $perPage, $page, ['path' => url()->current()]);
+        $albums = new LengthAwarePaginator($items, $total, $perPage, $page, ['path' => url()->current(), 'query' => request()->query()]);
         return view('admin.albums.index', compact('albums'));
     }
 

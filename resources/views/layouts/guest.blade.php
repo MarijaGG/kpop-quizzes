@@ -16,11 +16,6 @@
     </head>
     <body class="guest-body">
         <div class="guest-wrapper">
-            <div class="logo-wrap">
-                <a href="/">
-                    <x-application-logo class="app-logo" />
-                </a>
-            </div>
 
             <div class="auth-card">
                 {{ $slot }}

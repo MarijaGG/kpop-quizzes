@@ -1,16 +1,18 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container max-w-6xl mx-auto">
-    <div class="mb-4">
-        <a href="{{ route('admin.index') }}" class="px-3 py-2 bg-gray-100 border rounded hover:bg-gray-200">← Admin</a>
-    </div>
-    <div class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
-        <h2 class="text-xl font-semibold mb-4">Edit Album</h2>
+<div class="page-container">
+    <div class="page-inner max-w-6xl mx-auto">
+        <div class="mb-4 flex items-center justify-between">
+            <a href="{{ route('admin.albums.index') }}" class="back-button">← Albums</a>
+        </div>
 
-        <form method="post" action="{{ route('admin.albums.update', $album->id) }}" enctype="multipart/form-data">
-        @csrf
-        @method('PUT')
+        <div class="card">
+            <h2 class="text-xl font-semibold mb-4">Edit Album</h2>
+
+            <form method="post" action="{{ route('admin.albums.update', $album->id) }}" enctype="multipart/form-data">
+            @csrf
+            @method('PUT')
 
         <div class="mb-3">
             <label class="form-label">Image</label>
@@ -24,7 +26,7 @@
             <label class="form-label">Group</label>
             <select name="group_id" class="form-control" required>
                 @foreach($groups as $g)
-                    <option value="{{ $g->id }}" {{ $g->id === $album->group_id ? 'selected' : '' }}>{{ $g->name }}</option>
+                    <option value="{{ $g->id }}" {{ (string)$g->id === (string)($album->group_id ?? '') ? 'selected' : '' }}>{{ $g->name }}</option>
                 @endforeach
             </select>
         </div>
@@ -57,8 +59,9 @@
             <textarea name="description" class="form-control">{{ old('description', $album->description) }}</textarea>
         </div>
 
-        <button class="btn btn-primary">Update Album</button>
-    </form>
+                <button class="btn btn-primary">Update Album</button>
+            </form>
+        </div>
     </div>
 </div>
 @endsection
