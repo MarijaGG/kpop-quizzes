@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Role;
 
 class User extends Authenticatable
@@ -21,7 +22,9 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'bio',
         'email',
+        'avatar_member_id',
         'password',
     ];
 
@@ -51,6 +54,28 @@ class User extends Authenticatable
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class);
+    }
+
+    public function quizResults(): HasMany
+    {
+        return $this->hasMany(QuizResult::class);
+    }
+
+    public function avatarMember(): ?array
+    {
+        if (! $this->avatar_member_id) {
+            return null;
+        }
+
+        $data = json_decode(file_get_contents(resource_path('data/api.json')), true) ?? [];
+
+        foreach ($data['members'] ?? [] as $member) {
+            if ((int) ($member['id'] ?? 0) === (int) $this->avatar_member_id) {
+                return $member;
+            }
+        }
+
+        return null;
     }
 
     public function isAdmin(): bool

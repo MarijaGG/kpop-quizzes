@@ -11,14 +11,37 @@ use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
-    /**
-     * Display the user's profile form.
-     */
+    public function show(Request $request): View
+    {
+        $data = json_decode(file_get_contents(resource_path('data/api.json')), true) ?? [];
+        $quizNames = [];
+        foreach ($data['quizzes'] ?? [] as $quiz) {
+            $quizNames[(string)($quiz['id'] ?? '')] = $quiz['name'] ?? 'Quiz';
+        }
+
+        return view('profile.show', [
+            'user' => $request->user(),
+            'avatarMember' => $request->user()->avatarMember(),
+            'results' => $request->user()->quizResults()->latest()->get(),
+            'quizNames' => $quizNames,
+        ]);
+    }
+
     public function edit(Request $request): View
     {
+        $data = json_decode(file_get_contents(resource_path('data/api.json')), true) ?? [];
+
         return view('profile.edit', [
             'user' => $request->user(),
+            'members' => $data['members'] ?? [],
+            'groups' => $data['groups'] ?? [],
+            'avatarMember' => $request->user()->avatarMember(),
         ]);
+    }
+
+    public function history(Request $request): View
+    {
+        return redirect()->route('profile');
     }
 
     /**
@@ -34,7 +57,7 @@ class ProfileController extends Controller
 
         $request->user()->save();
 
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+        return Redirect::route('profile')->with('status', 'profile-updated');
     }
 
     /**

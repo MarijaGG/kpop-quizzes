@@ -5,7 +5,7 @@
         </h2>
 
         <p class="mt-1 text-sm text-gray-600">
-            {{ __("Update your account's profile information and email address.") }}
+            {{ __('Choose your profile picture and update your fan profile.') }}
         </p>
     </header>
 
@@ -21,6 +21,13 @@
             <x-input-label for="name" :value="__('Name')" />
             <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $user->name)" required autofocus autocomplete="name" />
             <x-input-error class="mt-2" :messages="$errors->get('name')" />
+        </div>
+
+        <div>
+            <x-input-label for="bio" :value="__('Bio')" />
+            <textarea id="bio" name="bio" maxlength="160" rows="3" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">{{ old('bio', $user->bio) }}</textarea>
+            <p class="mt-1 text-sm text-gray-600">Up to 160 characters.</p>
+            <x-input-error class="mt-2" :messages="$errors->get('bio')" />
         </div>
 
         <div>
@@ -47,8 +54,47 @@
             @endif
         </div>
 
+        <div>
+            <x-input-label for="avatar_member_id" :value="__('Profile picture')" />
+            @php($selectedGroup = $avatarMember['group_id'] ?? '')
+            <div class="current-avatar-preview mt-2">
+                @if($avatarMember && !empty($avatarMember['image']))
+                    <img src="{{ asset('storage/'.$avatarMember['image']) }}" alt="{{ $avatarMember['name'] }}">
+                    <span>{{ $avatarMember['name'] }}</span>
+                @else
+                    <span class="current-avatar-empty">No profile picture selected</span>
+                @endif
+            </div>
+            <div class="avatar-filter-row mt-4">
+                <x-input-label for="group_filter" :value="__('Choose a group')" />
+                <select id="group_filter" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                    <option value="" @selected($selectedGroup === '')>Choose a group...</option>
+                    @foreach($groups as $group)
+                        <option value="{{ $group['id'] }}" @selected((string) $selectedGroup === (string) $group['id'])>{{ $group['name'] }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="avatar-grid mt-3" id="avatar-grid" @if($selectedGroup === '') hidden @endif>
+                <label class="avatar-option" data-group="any">
+                    <input type="radio" name="avatar_member_id" value=""
+                           @checked(old('avatar_member_id', $user->avatar_member_id) === null)>
+                    <span class="no-avatar-image">None</span>
+                    <span>No profile picture</span>
+                </label>
+                @foreach($members as $member)
+                    <label class="avatar-option" data-group="{{ $member['group_id'] ?? '' }}">
+                        <input type="radio" name="avatar_member_id" value="{{ $member['id'] }}"
+                               @checked((int) old('avatar_member_id', $user->avatar_member_id) === (int) $member['id'])>
+                        <img src="{{ asset('storage/'.$member['image']) }}" alt="{{ $member['name'] }}">
+                        <span>{{ $member['name'] }}</span>
+                    </label>
+                @endforeach
+            </div>
+            <x-input-error class="mt-2" :messages="$errors->get('avatar_member_id')" />
+        </div>
+
         <div class="flex items-center gap-4">
-            <x-primary-button>{{ __('Save') }}</x-primary-button>
+            <x-primary-button>{{ __('Save changes') }}</x-primary-button>
 
             @if (session('status') === 'profile-updated')
                 <p
@@ -62,3 +108,24 @@
         </div>
     </form>
 </section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const filter = document.getElementById('group_filter');
+        const grid = document.getElementById('avatar-grid');
+        const options = document.querySelectorAll('#avatar-grid .avatar-option');
+
+        const updateAvatarOptions = function () {
+            const hasSelection = filter.value !== '';
+            grid.hidden = !hasSelection;
+
+            options.forEach(function (option) {
+                const visible = hasSelection && (option.dataset.group === filter.value || option.dataset.group === 'any');
+                option.hidden = !visible;
+            });
+        };
+
+        filter.addEventListener('change', updateAvatarOptions);
+        updateAvatarOptions();
+    });
+</script>

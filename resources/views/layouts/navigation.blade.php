@@ -23,9 +23,17 @@
                     </div>
                 @endif
                 @auth
+                @php($navAvatar = auth()->user()->avatarMember())
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="dropdown-trigger">
+                            <span class="nav-avatar">
+                                @if($navAvatar && !empty($navAvatar['image']))
+                                    <img src="{{ asset('storage/'.$navAvatar['image']) }}" alt="{{ $navAvatar['name'] }}">
+                                @else
+                                    {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                                @endif
+                            </span>
                             <div>{{ auth()->user()->name ?? auth()->user()->email }}</div>
 
                             <div class="ms-1">
@@ -37,10 +45,9 @@
                     </x-slot>
 
                     <x-slot name="content">
-                        <x-dropdown-link :href="route('profile.edit')">
+                        <x-dropdown-link :href="route('profile')">
                             {{ __('Profile') }}
                         </x-dropdown-link>
-
                         <!-- Authentication -->
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf

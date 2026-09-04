@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\QuizResult;
 use Illuminate\Http\Request;
 
 class QuizController extends Controller
@@ -39,6 +40,7 @@ class QuizController extends Controller
 
     public function start($id)
     {
+        session()->forget("quiz_result_saved.$id");
         $json = json_decode(file_get_contents(resource_path('data/api.json')), true) ?? [];
         $questions = array_values(array_filter($json['questions'] ?? [], function($q) use ($id){ return (string)($q['quiz_id'] ?? '') === (string)$id; }));
         if (empty($questions)) { return redirect()->route('quizzes.show', $id)->with('error','No questions'); }
@@ -129,6 +131,8 @@ class QuizController extends Controller
         $index++;
         session(["quiz_run.$id" => ['quiz' => $run, 'index' => $index, 'responses' => $responses]]);
         if ($index >= count($run['questions'])) {
+            session(["quiz_ready_to_finalize.$id" => true]);
+            $this->result($id);
             return redirect()->route('quizzes.result', $id);
         }
         return redirect()->route('quizzes.take', $id);
@@ -198,7 +202,14 @@ class QuizController extends Controller
             }
             $percent = $total > 0 ? round(($correct / $total) * 100) : 0;
             $resultType = 'percent';
-            $result = (object)['percent' => $percent, 'correct' => $correct, 'total' => $total, 'member_id' => $knowledgeMemberId];
+            $result = (object)[
+                'percent' => $percent,
+                'correct' => $correct,
+                'total' => $total,
+                'member_id' => $knowledgeMemberId,
+                'name' => $membersById[$knowledgeMemberId]['name'] ?? 'Knowledge result',
+            ];
+            $this->saveQuizHistory($id, $quizMeta, $resultType, $result, $total, $correct);
             return view('quizzes.result', ['quiz_id' => $id, 'resultType' => $resultType, 'result' => $result, 'members' => $members]);
         }
 
@@ -253,12 +264,19 @@ class QuizController extends Controller
             return view('quizzes.result', ['quiz_id' => $id, 'resultType' => null, 'result' => null, 'members' => $members]); 
         }
 
+        $resultScore = match ($resultType) {
+            'group' => $topGroupScore,
+            'album' => $topAlbumScore,
+            default => $topMemberScore,
+        };
+        $shouldUpdateStats = $this->saveQuizHistory($id, $quizMeta, $resultType, $result, count($run['questions']), $resultScore);
+
         // --- Persist simple quiz stats into the static api.json ---
         // structure: quiz_stats[quizId][type][id] => count
         $quizStats = $json['quiz_stats'] ?? [];
         $quizStats[$id] = $quizStats[$id] ?? [];
 
-        if ($resultType === 'percent') {
+        if ($shouldUpdateStats && $resultType === 'percent') {
             // bucket percent into ranges
             $p = (int)($result->percent ?? 0);
             if ($p <= 30) { $bucket = '0-30'; }
@@ -267,7 +285,7 @@ class QuizController extends Controller
             else { $bucket = '91-100'; }
             $quizStats[$id]['percent_buckets'] = $quizStats[$id]['percent_buckets'] ?? [];
             $quizStats[$id]['percent_buckets'][$bucket] = ($quizStats[$id]['percent_buckets'][$bucket] ?? 0) + 1;
-        } else {
+        } elseif ($shouldUpdateStats) {
             // increment count for the resulting entity
             $tid = null;
             if ($resultType === 'member') { $tid = $result->id ?? $result->member_id ?? null; }
@@ -280,8 +298,10 @@ class QuizController extends Controller
             }
         }
 
-        $json['quiz_stats'] = $quizStats;
-        file_put_contents(resource_path('data/api.json'), json_encode($json, JSON_PRETTY_PRINT));
+        if ($shouldUpdateStats) {
+            $json['quiz_stats'] = $quizStats;
+            file_put_contents(resource_path('data/api.json'), json_encode($json, JSON_PRETTY_PRINT));
+        }
 
         // build candidates list for display: all options present in run payload for the chosen/result types
         $candidates = [];
@@ -307,5 +327,31 @@ class QuizController extends Controller
         }
 
         return view('quizzes.result', ['quiz_id' => $id, 'resultType' => $resultType, 'result' => $result, 'members' => $members, 'quizStats' => $quizStats[$id] ?? [], 'candidates' => $candidates]);
+    }
+
+    private function saveQuizHistory($id, ?array $quizMeta, string $resultType, object $result, int $total, $score): bool
+    {
+        $sessionKey = "quiz_result_saved.$id";
+        if (session()->has($sessionKey) || ! session()->pull("quiz_ready_to_finalize.$id") || ! auth()->check()) {
+            return false;
+        }
+
+        $isKnowledgeQuiz = $resultType === 'percent';
+
+        QuizResult::create([
+            'user_id' => auth()->id(),
+            'quiz_id' => (int) $id,
+            'quiz_name' => $quizMeta['name'] ?? 'Quiz',
+            'result_type' => $isKnowledgeQuiz ? 'knowledge' : 'personality',
+            'correct_answers' => $isKnowledgeQuiz ? (int) ($result->correct ?? 0) : null,
+            'total_questions' => $isKnowledgeQuiz ? $total : null,
+            'result_name' => $isKnowledgeQuiz ? null : ($result->name ?? $result->title ?? 'Quiz result'),
+            'total_points' => $isKnowledgeQuiz ? (int) ($result->percent ?? 0) : 0,
+            'details' => null,
+        ]);
+
+        session([$sessionKey => true]);
+
+        return true;
     }
 }
