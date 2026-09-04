@@ -28,6 +28,12 @@
                 <p class="profile-saved">Profile updated.</p>
             @endif
 
+            @if(session('status') === 'favorites-updated')
+                <p class="profile-saved">Favourites updated.</p>
+            @endif
+
+            @include('profile.partials.favourites')
+
             @include('profile.partials.quiz-history')
         </div>
     </div>

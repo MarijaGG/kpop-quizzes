@@ -170,6 +170,42 @@
 .profile-history { margin-top: 2rem; }
 .profile-section-heading { padding-bottom: .75rem; border-bottom: 2px solid var(--brand-1); }
 .profile-section-heading h2 { color: var(--brand-1); font-size: 1.25rem; font-weight: 700; }
+.profile-favourites { margin-top: 2rem; }
+.profile-favourites-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.favourite-tabs { display: flex; gap: .5rem; margin-top: 1rem; border-bottom: 1px solid rgba(0,0,0,.12); }
+.favourite-tab { padding: .55rem .85rem; color: var(--muted); border-bottom: 3px solid transparent; }
+.favourite-tab.is-active { color: var(--brand-1); border-bottom-color: var(--brand-1); font-weight: 700; }
+.favourite-panel { display: none; padding-top: 1rem; }
+.favourite-panel.is-active { display: block; }
+.favourite-ranked-grid { display: grid; gap: 1rem; }
+.favourite-ranked-group, .favourite-ranked-member, .favourite-ranked-album { grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; justify-content: center; margin-inline: auto; max-width: 900px; }
+.favourite-ranked-card.favourite-rank-1 { grid-column: 2; grid-row: 1; justify-self: center; }
+.favourite-ranked-card.favourite-rank-2 { grid-column: 1; grid-row: 1; align-self: center; transform: translateY(.75rem); }
+.favourite-ranked-card.favourite-rank-3 { grid-column: 3; grid-row: 1; align-self: center; transform: translateY(.75rem); }
+.favourite-ranked-group .favourite-rank-1 { width: 100%; }
+.favourite-ranked-card { position: relative; overflow: hidden; isolation: isolate; border-radius: .5rem; background: rgba(255,255,255,.55); }
+.favourite-ranked-card img { display: block; width: 100%; object-fit: cover; }
+.favourite-ranked-group img { aspect-ratio: 4 / 3; }
+.favourite-ranked-group .favourite-rank-1 img { aspect-ratio: 4 / 3; }
+.favourite-ranked-group .favourite-rank-2 img, .favourite-ranked-group .favourite-rank-3 img { aspect-ratio: 16 / 9; }
+.favourite-ranked-member img { aspect-ratio: 1; }
+.favourite-ranked-member .favourite-rank-2, .favourite-ranked-member .favourite-rank-3, .favourite-ranked-album .favourite-rank-2, .favourite-ranked-album .favourite-rank-3 { width: 78%; justify-self: center; }
+.favourite-ranked-album img { aspect-ratio: 1; }
+.favourite-ranked-member, .favourite-ranked-album { max-width: 680px; }
+.favourite-ranked-card::after { content: ''; position: absolute; z-index: 0; right: 0; bottom: 0; left: 0; height: 55%; background: linear-gradient(to top, rgba(0,0,0,.78), transparent); pointer-events: none; }
+.favourite-ranked-copy { position: absolute; z-index: 1; inset: 0; display: flex; align-items: flex-end; justify-content: flex-end; padding: .75rem; pointer-events: none; }
+.favourite-rank { position: absolute; top: .65rem; left: .65rem; padding: .2rem .45rem; border-radius: .3rem; background: var(--brand-1); color: white; font-size: .85rem; font-weight: 800; line-height: 1; box-shadow: 0 2px 6px rgba(0,0,0,.25); }
+.favourite-rank-1 .favourite-rank { background: white; color: var(--brand-1); }
+.favourite-ranked-copy h3 { max-width: 90%; color: white; font-weight: 700; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 3px rgba(0,0,0,.65); }
+.favourite-empty { padding: 1rem 0; }
+.favourites-editor { margin-top: 1.25rem; padding: 1.25rem; background: rgba(255,255,255,.55); border: 1px solid rgba(0,0,0,.06); border-radius: .5rem; }
+.favourites-editor-group + .favourites-editor-group { margin-top: 1.25rem; }
+.favourites-editor-group h3 { color: var(--brand-1); font-weight: 700; margin-bottom: .65rem; }
+.favourites-editor-title { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+.favourites-ranked-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.favourite-select { width: 100%; margin-top: .35rem; border: 1px solid rgba(0,0,0,.15); border-radius: .375rem; padding: .6rem .7rem; background: white; color: var(--text); }
+.favourite-filter-select { border: 1px solid rgba(0,0,0,.15); border-radius: .375rem; padding: .45rem .6rem; background: white; color: var(--text); }
+.favourites-actions { margin-top: 1rem; }
 .history-item { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 1rem; align-items: center; padding: 1rem 0; border-bottom: 1px solid rgba(0,0,0,.1); }
 .history-quiz h3 { font-weight: 700; color: var(--brand-1); }
 .history-result { margin-top: .25rem; color: var(--text); font-weight: 600; }
@@ -179,6 +215,8 @@
    .profile-summary { flex-direction: column; padding: 1.25rem; }
    .profile-summary-heading { flex-direction: column; }
    .avatar-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+   .favourite-ranked-group, .favourite-ranked-member, .favourite-ranked-album, .favourites-ranked-fields { grid-template-columns: 1fr; }
+   .favourite-ranked-card.favourite-rank-1, .favourite-ranked-card.favourite-rank-2, .favourite-ranked-card.favourite-rank-3 { grid-column: auto; grid-row: auto; transform: none; width: 100%; }
    .history-item { grid-template-columns: 1fr auto; }
    .history-item time { grid-column: 1; }
    .history-item .btn { grid-column: 2; grid-row: 2; }

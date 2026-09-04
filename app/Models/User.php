@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasMany as HasManyRelation;
 use App\Models\Role;
 
 class User extends Authenticatable
@@ -59,6 +60,11 @@ class User extends Authenticatable
     public function quizResults(): HasMany
     {
         return $this->hasMany(QuizResult::class);
+    }
+
+    public function favorites(): HasManyRelation
+    {
+        return $this->hasMany(UserFavorite::class)->orderBy('position');
     }
 
     public function avatarMember(): ?array
