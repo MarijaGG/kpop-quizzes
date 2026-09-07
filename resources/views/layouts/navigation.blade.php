@@ -13,6 +13,9 @@
                     <x-nav-link :href="route('quizzes.index')" :active="request()->routeIs('quizzes.*')">
                         {{ __('Quizzes') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('guess-idol.index')" :active="request()->routeIs('guess-idol.*')">
+                        {{ __('Guess the idol') }}
+                    </x-nav-link>
                 </div>
             </div>
 

@@ -15,12 +15,14 @@
                 @if($resultType === 'knowledge')
                     <p class="history-result">Score: {{ $result->total_points }}%</p>
                     <span class="muted">Questions: {{ $result->correct_answers ?? $details['correct'] ?? 0 }}/{{ $result->total_questions ?? $details['total'] ?? 0 }} correct</span>
+                @elseif($resultType === 'guess_idol')
+                    <p class="history-result">Score: {{ $result->correct_answers }}/{{ $result->total_questions }} correct</p>
                 @else
                     <p class="history-result">Result: {{ $result->result_name ?? 'Not available' }}</p>
                 @endif
             </div>
             <time class="muted" datetime="{{ $result->created_at->toIso8601String() }}">{{ $result->created_at->format('M j, Y') }}</time>
-            <a href="{{ route('quizzes.start', $result->quiz_id) }}" class="btn btn-ghost">Retake</a>
+            <a href="{{ $resultType === 'guess_idol' ? route('guess-idol.index') : route('quizzes.start', $result->quiz_id) }}" class="btn btn-ghost">Retake</a>
         </article>
     @empty
         <div class="card">

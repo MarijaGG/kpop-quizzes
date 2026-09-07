@@ -25,6 +25,11 @@
                 <div class="admin-title">Quizzes</div>
                 <div class="admin-desc">Manage quizzes, questions and results.</div>
             </a>
+
+            <a href="{{ route('admin.guess-idol-images.index') }}" class="admin-tile">
+                <div class="admin-title">Guess Idol Images</div>
+                <div class="admin-desc">Manage detail images for dynamic guess-idol rounds.</div>
+            </a>
         </div>
     </div>
 </div>

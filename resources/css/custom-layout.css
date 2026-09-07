@@ -211,6 +211,16 @@
 .history-result { margin-top: .25rem; color: var(--text); font-weight: 600; }
 .history-score { display: flex; flex-direction: column; }
 .history-score strong { color: var(--text); }
+.guess-image-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.guess-image-card { overflow: hidden; border: 1px solid rgba(0,0,0,.08); border-radius: .5rem; background: rgba(255,255,255,.55); }
+.guess-image-card > img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; }
+.guess-image-card-copy { display: flex; flex-direction: column; gap: .2rem; padding: .75rem; }
+.guess-image-card-copy span { color: var(--muted); font-size: .85rem; }
+.guess-image-actions { display: flex; gap: .5rem; margin-top: .5rem; }
+.guess-question-card { max-width: 34rem; }
+.guess-question-image { display: block; width: min(100%, 24rem); aspect-ratio: 1; object-fit: contain; padding: .5rem; background: rgba(255,255,255,.7); margin: 1rem auto; border-radius: .5rem; }
+.guess-answer-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; }
+.guess-final-score { margin-top: 1rem; color: var(--brand-1); font-size: 2rem; font-weight: 800; }
 @media (max-width: 640px) {
    .profile-summary { flex-direction: column; padding: 1.25rem; }
    .profile-summary-heading { flex-direction: column; }
@@ -220,6 +230,7 @@
    .history-item { grid-template-columns: 1fr auto; }
    .history-item time { grid-column: 1; }
    .history-item .btn { grid-column: 2; grid-row: 2; }
+   .guess-image-grid, .guess-answer-grid { grid-template-columns: 1fr; }
 }
 
 /* ==========================
