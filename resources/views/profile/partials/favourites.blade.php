@@ -45,12 +45,16 @@
                     @foreach([1, 2, 3] as $position)
                         <div>
                             <x-input-label for="favorite_group_{{ $position }}" :value="__('Favourite group #'.$position)" />
+                            <div class="favourite-autocomplete" data-autocomplete>
+                            <input type="search" class="favourite-search favourite-slot-search" placeholder="Search groups..." aria-label="Search favourite group {{ $position }}" autocomplete="off" data-search-target="favorite_group_{{ $position }}">
+                            <div class="favourite-suggestions" data-suggestions></div>
                             <select id="favorite_group_{{ $position }}" name="favorite_groups[]" class="favourite-select favourite-group-select" @if($position === 1) data-primary-favourite-group @endif>
                                 <option value="">Not selected</option>
                                 @foreach($groups as $group)
                                     <option value="{{ $group['id'] }}" @selected((int) ($favorites['group'][$position]['id'] ?? 0) === (int) $group['id'])>{{ $group['name'] }}</option>
                                 @endforeach
                             </select>
+                            </div>
                         </div>
                     @endforeach
                 </div>
@@ -64,29 +68,39 @@
                     @foreach([1, 2, 3] as $position)
                         <div>
                             <x-input-label for="favorite_member_{{ $position }}" :value="__('Favourite idol #'.$position)" />
+                            <div class="favourite-autocomplete" data-autocomplete>
+                            <input type="search" class="favourite-search favourite-slot-search" placeholder="Search idols..." aria-label="Search favourite idol {{ $position }}" autocomplete="off" data-search-target="favorite_member_{{ $position }}">
+                            <div class="favourite-suggestions" data-suggestions></div>
                             <select id="favorite_member_{{ $position }}" name="favorite_members[]" class="favourite-select favourite-filtered-select">
                                 <option value="">Not selected</option>
                                 @foreach($members as $member)
                                     <option value="{{ $member['id'] }}" data-group="{{ $member['group_id'] ?? '' }}" @selected((int) ($favorites['member'][$position]['id'] ?? 0) === (int) $member['id'])>{{ $member['name'] }}</option>
                                 @endforeach
                             </select>
+                            </div>
                         </div>
                     @endforeach
                 </div>
             </div>
 
             <div class="favourites-editor-group">
-                <h3>Top albums</h3>
+                <div class="favourites-editor-title">
+                    <h3>Top albums</h3>
+                </div>
                 <div class="favourites-ranked-fields">
                     @foreach([1, 2, 3] as $position)
                         <div>
                             <x-input-label for="favorite_album_{{ $position }}" :value="__('Favourite album #'.$position)" />
+                            <div class="favourite-autocomplete" data-autocomplete>
+                            <input type="search" class="favourite-search favourite-slot-search" placeholder="Search albums..." aria-label="Search favourite album {{ $position }}" autocomplete="off" data-search-target="favorite_album_{{ $position }}">
+                            <div class="favourite-suggestions" data-suggestions></div>
                             <select id="favorite_album_{{ $position }}" name="favorite_albums[]" class="favourite-select favourite-filtered-select">
                                 <option value="">Not selected</option>
                                 @foreach($albums as $album)
                                     <option value="{{ $album['id'] }}" data-group="{{ $album['group_id'] ?? '' }}" @selected((int) ($favorites['album'][$position]['id'] ?? 0) === (int) $album['id'])>{{ $album['title'] }}</option>
                                 @endforeach
                             </select>
+                            </div>
                         </div>
                     @endforeach
                 </div>
@@ -107,10 +121,8 @@
 
         const toggle = section.querySelector('[data-favourites-toggle]');
         const editor = section.querySelector('[data-favourites-editor]');
-        const primaryGroup = section.querySelector('[data-primary-favourite-group]');
         const tabs = section.querySelectorAll('[data-favourite-tab]');
         const panels = section.querySelectorAll('[data-favourite-panel]');
-        const selects = section.querySelectorAll('.favourite-filtered-select');
 
         toggle.addEventListener('click', function () {
             editor.hidden = !editor.hidden;
@@ -128,18 +140,39 @@
             });
         });
 
-        function filterFavouriteItems() {
-            const groupId = primaryGroup.value;
-            selects.forEach(function (select) {
-                Array.from(select.options).forEach(function (option, index) {
-                    if (index > 0) option.hidden = groupId !== '' && option.dataset.group !== groupId;
-                });
-            });
-        }
+        section.querySelectorAll('[data-autocomplete]').forEach(function (autocomplete) {
+            const search = autocomplete.querySelector('[data-search-target]');
+            const select = document.getElementById(search.dataset.searchTarget);
+            const suggestions = autocomplete.querySelector('[data-suggestions]');
+            const options = Array.from(select.options);
 
-        primaryGroup.addEventListener('change', function () {
-            filterFavouriteItems();
+            function renderSuggestions() {
+                const query = search.value.trim().toLowerCase();
+                suggestions.innerHTML = '';
+                suggestions.hidden = false;
+
+                options.filter(option => option.textContent.toLowerCase().includes(query)).forEach(function (option) {
+                    const suggestion = document.createElement('button');
+                    suggestion.type = 'button';
+                    suggestion.className = 'favourite-suggestion';
+                    suggestion.textContent = option.textContent;
+                    suggestion.addEventListener('click', function () {
+                        select.value = option.value;
+                        search.value = option.value === '' ? '' : option.textContent;
+                        suggestions.hidden = true;
+                    });
+                    suggestions.appendChild(suggestion);
+                });
+            }
+
+            const selected = options.find(option => option.selected && option.value !== '');
+            if (selected) search.value = selected.textContent;
+
+            search.addEventListener('focus', renderSuggestions);
+            search.addEventListener('input', renderSuggestions);
+            document.addEventListener('click', function (event) {
+                if (!autocomplete.contains(event.target)) suggestions.hidden = true;
+            });
         });
-        filterFavouriteItems();
     });
 </script>
