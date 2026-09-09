@@ -79,6 +79,7 @@ class QuizController extends BaseAdminController
 
         if ($request->hasFile('image')) {
             $payload['image'] = $request->file('image')->store('images/quizzes', 'public');
+            $this->publishImage($payload['image']);
         }
 
         $items[] = $payload;
@@ -140,6 +141,7 @@ class QuizController extends BaseAdminController
                 Storage::disk('public')->delete($existing['image']);
             }
             $data['image'] = $request->file('image')->store('images/quizzes', 'public');
+            $this->publishImage($data['image']);
         }
 
         $updated = [];
@@ -231,5 +233,15 @@ class QuizController extends BaseAdminController
         $json['quizzes'] = $new;
         file_put_contents(resource_path('data/api.json'), json_encode($json, JSON_PRETTY_PRINT));
         return redirect()->route('admin.quizzes.index')->with('success', 'Quiz deleted');
+    }
+
+    private function publishImage(string $path): void
+    {
+        $source = storage_path('app/public/'.$path);
+        $destination = public_path('storage/'.$path);
+        if (! is_dir(dirname($destination))) {
+            mkdir(dirname($destination), 0755, true);
+        }
+        copy($source, $destination);
     }
 }

@@ -50,6 +50,7 @@ class GroupController extends BaseAdminController
 
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('images/groups', 'public');
+            $this->publishImage($data['image']);
         }
 
         // append to static data file
@@ -106,6 +107,7 @@ class GroupController extends BaseAdminController
                 Storage::disk('public')->delete($existing['image']);
             }
             $data['image'] = $request->file('image')->store('images/groups', 'public');
+            $this->publishImage($data['image']);
         }
 
         // update static file
@@ -144,4 +146,15 @@ class GroupController extends BaseAdminController
         file_put_contents(resource_path('data/api.json'), json_encode($json, JSON_PRETTY_PRINT));
         return redirect()->route('admin.groups.index')->with('success', 'Group deleted');
     }
+
+    private function publishImage(string $path): void
+    {
+        $source = storage_path('app/public/'.$path);
+        $destination = public_path('storage/'.$path);
+        if (! is_dir(dirname($destination))) {
+            mkdir(dirname($destination), 0755, true);
+        }
+        copy($source, $destination);
+    }
+
 }

@@ -58,6 +58,7 @@ class MemberController extends BaseAdminController
 
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('images/members', 'public');
+            $this->publishImage($data['image']);
         }
 
         $json = json_decode(file_get_contents(resource_path('data/api.json')), true) ?? [];
@@ -116,6 +117,7 @@ class MemberController extends BaseAdminController
                 Storage::disk('public')->delete($existing['image']);
             }
             $data['image'] = $request->file('image')->store('images/members', 'public');
+            $this->publishImage($data['image']);
         }
 
         $updated = [];
@@ -150,4 +152,15 @@ class MemberController extends BaseAdminController
         file_put_contents(resource_path('data/api.json'), json_encode($json, JSON_PRETTY_PRINT));
         return redirect()->route('admin.members.index')->with('success', 'Member deleted');
     }
+
+    private function publishImage(string $path): void
+    {
+        $source = storage_path('app/public/'.$path);
+        $destination = public_path('storage/'.$path);
+        if (! is_dir(dirname($destination))) {
+            mkdir(dirname($destination), 0755, true);
+        }
+        copy($source, $destination);
+    }
+
 }
