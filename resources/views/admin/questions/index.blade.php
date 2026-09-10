@@ -4,7 +4,7 @@
 <div class="page-container">
     <div class="page-inner max-w-6xl mx-auto">
         <div class="mb-4 flex items-center justify-between">
-            <a href="{{ route('admin.index') }}" class="back-button">← Admin</a>
+            <a href="{{ route('admin.quizzes.index') }}" class="back-button">← Quizzes</a>
             <a href="{{ route('admin.quizzes.questions.create', $quiz->id ?? request()->segment(3)) }}" class="btn btn-primary">New</a>
         </div>
         <div class="card">

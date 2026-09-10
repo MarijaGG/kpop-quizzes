@@ -164,9 +164,8 @@ class QuizController extends BaseAdminController
             $qtexts = $request->input('questions');
             $allQuestions = $json['questions'] ?? [];
 
-            // split existing questions for this quiz and others
+            // replace the complete question set for this quiz so duplicate rows cannot survive
             $existingForQuiz = array_values(array_filter($allQuestions, function($q) use ($quiz){ return (string)($q['quiz_id'] ?? '') === (string)$quiz; }));
-            usort($existingForQuiz, function($a,$b){ return ($a['order'] ?? 0) <=> ($b['order'] ?? 0); });
             $otherQuestions = array_values(array_filter($allQuestions, function($q) use ($quiz){ return (string)($q['quiz_id'] ?? '') !== (string)$quiz; }));
 
             // determine current max id across all questions
@@ -174,26 +173,15 @@ class QuizController extends BaseAdminController
             $maxQ = count($allIds) ? max($allIds) : 0;
 
             $newQuestions = $otherQuestions;
-            $keptIds = [];
             foreach ($qtexts as $i => $txt) {
                 if (! is_string($txt) || trim($txt) === '') { continue; }
-                if (isset($existingForQuiz[$i])) {
-                    $q = $existingForQuiz[$i];
-                    $q['text'] = $txt;
-                    $q['order'] = $i + 1;
-                    $newQuestions[] = $q;
-                    $keptIds[] = $q['id'];
-                } else {
-                    $maxQ++;
-                    $q = [
-                        'id' => $maxQ,
-                        'quiz_id' => (int)$quiz,
-                        'text' => $txt,
-                        'order' => $i + 1,
-                    ];
-                    $newQuestions[] = $q;
-                    $keptIds[] = $q['id'];
-                }
+                $maxQ++;
+                $newQuestions[] = [
+                    'id' => $maxQ,
+                    'quiz_id' => (int)$quiz,
+                    'text' => $txt,
+                    'order' => $i + 1,
+                ];
             }
 
             // write back questions
@@ -201,9 +189,9 @@ class QuizController extends BaseAdminController
 
             // remove answers only for questions that were removed from THIS quiz
             $answers = $json['answers'] ?? [];
-            // determine which existing question ids for this quiz were removed
+            // all previous question IDs for this quiz were replaced
             $existingIds = array_column($existingForQuiz, 'id');
-            $removedIds = array_values(array_diff($existingIds, $keptIds));
+            $removedIds = $existingIds;
             if (!empty($removedIds)) {
                 $answers = array_values(array_filter($answers, function($a) use ($removedIds){
                     if (!isset($a['question_id'])) { return true; }

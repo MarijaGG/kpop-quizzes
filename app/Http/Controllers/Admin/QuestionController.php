@@ -12,6 +12,12 @@ class QuestionController extends BaseAdminController
     {
         $json = json_decode(file_get_contents(resource_path('data/api.json')), true) ?? [];
         $questions = array_values(array_filter($json['questions'] ?? [], function($q) use ($quizId) { return (string)($q['quiz_id'] ?? '') === (string)$quizId; }));
+        $byOrder = [];
+        foreach ($questions as $question) {
+            $byOrder[(int) ($question['order'] ?? 0)] = $question;
+        }
+        $questions = array_values($byOrder);
+        usort($questions, fn ($a, $b) => ($a['order'] ?? 0) <=> ($b['order'] ?? 0));
         $page = (int) request('page', 1);
         $perPage = 50;
         $total = count($questions);

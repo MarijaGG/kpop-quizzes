@@ -13,7 +13,7 @@
             "name": "TOMORROW X TOGETHER",
             "debut_date": "2019-03-04",
             "concept": "Youthful fantasy growth",
-            "about": "TXT (\ud22c\ubaa8\ub85c\uc6b0\ubc14\uc774\ud22c\uac8c\ub354), also known as TOMORROW X TOGETHER, is a 5-member boy group formed by BIGHIT MUSIC (part of HYBE LABELS), consisting of Soobin, Yeonjun, Beomgyu, Taehyun, and Hueningkai. They debuted on March 4, 2019, with their first mini album, The Dream Chapter: STAR. There are no set positions within the group, it changes each comeback\/release\/song.",
+            "about": "TXT (\ud22c\ubaa8\ub85c\uc6b0\ubc14\uc774\ud22c\uac8c\ub354), also known as TOMORROW X TOGETHER, is a 5-member boy group formed by BIGHIT MUSIC (part of HYBE LABELS), consisting of Soobin, Yeonjun, Beomgyu, Taehyun, and Hueningkai. They debuted on March 4, 2019, with their first mini album, The Dream Chapter: STAR.",
             "description": "You\u2019re someone who lives between reality and dreams. You care deeply about your friendships and the journey you\u2019re on, even when things feel confusing or overwhelming. Like TXT\u2019s stories, your life is about growing, discovering who you are, and learning that it\u2019s okay to change along the way. You balance softness with strength, and even when the world feels uncertain, you hold onto the people and dreams that matter most to you.",
             "image": "images\/groups\/MxK9V6vXKYKWAfdsBdOn8FlCUxGSyfqOSOJKfTBj.webp",
             "id": 2
@@ -49,8 +49,8 @@
             "name": "ATEEZ",
             "debut_date": "2018-10-24",
             "concept": "Pirates, adventurous, free, loud, youthful",
-            "about": "ATEEZ (\uc5d0\uc774\ud2f0\uc988), known pre-debut as KQ Fellaz, is a 8-member boy group under KQ Entertainment. The group consists of: Seonghwa, Hongjoong, Yunho, Yeosang, San, Mingi, Wooyoung, and Jongho. They released the pre-debut song, From on July 9, 2018 with another trainee named Junyoung. The group debuted on October 24, 2018 with their first mini album, Treasure Ep.1: All to Zero. On July 8, 2019, ATEEZ signed with USA record label RCA Records. They are also signed to the Japanese record label Nippon Columbia since 2019.",
-            "description": "You\u2019re someone who is adventurous, passionate, and determined to create your own path. Like ATEEZ, you aren\u2019t afraid of the unknown and would rather chase an exciting dream than stay somewhere comfortable. You value the people who journey alongside you, finding strength in friendship while still wanting the freedom to discover who you are.\r\n\r\nYou have an intense side that pushes you to keep going when things get difficult, but you also have a playful and warm side that makes the journey more meaningful. You don\u2019t just want to reach the destination \u2014 you want to make the journey unforgettable.",
+            "about": "ATEEZ (\uc5d0\uc774\ud2f0\uc988), known pre-debut as KQ Fellaz, is a 8-member boy group under KQ Entertainment. The group consists of: Seonghwa, Hongjoong, Yunho, Yeosang, San, Mingi, Wooyoung, and Jongho. The group debuted on October 24, 2018 with their first mini album, Treasure Ep.1: All to Zero. They are also signed to the Japanese record label Nippon Columbia since 2019.",
+            "description": "You\u2019re someone who is adventurous, passionate, and determined to create your own path. Like ATEEZ, you aren\u2019t afraid of the unknown and would rather chase an exciting dream than stay somewhere comfortable. You value the people who journey alongside you. You have an intense side that pushes you to keep going when things get difficult, but you also have a playful and warm side that makes the journey more meaningful.",
             "image": "images\/groups\/s2T7wCtiP53J8w32UvLpKsvnA9UDozFEtVy19fDs.jpg",
             "id": 6
         }
@@ -803,63 +803,63 @@
             "order": 10
         },
         {
-            "id": 161,
-            "quiz_id": 13,
-            "text": "x",
+            "id": 71,
+            "quiz_id": 7,
+            "text": "Your friends describe you as...",
             "order": 1
         },
         {
-            "id": 162,
-            "quiz_id": 13,
-            "text": "x",
+            "id": 72,
+            "quiz_id": 7,
+            "text": "Your biggest strength is...",
             "order": 2
         },
         {
-            "id": 163,
-            "quiz_id": 13,
-            "text": "z",
+            "id": 73,
+            "quiz_id": 7,
+            "text": "When facing a challenge, you...",
             "order": 3
         },
         {
-            "id": 164,
-            "quiz_id": 13,
-            "text": "z",
+            "id": 74,
+            "quiz_id": 7,
+            "text": "Your vibe in a group is...",
             "order": 4
         },
         {
-            "id": 165,
-            "quiz_id": 13,
-            "text": "x",
+            "id": 75,
+            "quiz_id": 7,
+            "text": "Pick a hobby:",
             "order": 5
         },
         {
-            "id": 166,
-            "quiz_id": 13,
-            "text": "x",
+            "id": 76,
+            "quiz_id": 7,
+            "text": "How do you show care?",
             "order": 6
         },
         {
-            "id": 167,
-            "quiz_id": 13,
-            "text": "z",
+            "id": 77,
+            "quiz_id": 7,
+            "text": "Your biggest fear is...",
             "order": 7
         },
         {
-            "id": 168,
-            "quiz_id": 13,
-            "text": "c",
+            "id": 78,
+            "quiz_id": 7,
+            "text": "Your energy is...",
             "order": 8
         },
         {
-            "id": 169,
-            "quiz_id": 13,
-            "text": "a",
+            "id": 79,
+            "quiz_id": 7,
+            "text": "In stressful situations, you...",
             "order": 9
         },
         {
-            "id": 170,
-            "quiz_id": 13,
-            "text": "q",
+            "id": 80,
+            "quiz_id": 7,
+            "text": "Your life motto would be...",
             "order": 10
         },
         {
@@ -920,66 +920,6 @@
             "id": 180,
             "quiz_id": 13,
             "text": "If your personality were a place, where would it be?",
-            "order": 10
-        },
-        {
-            "id": 71,
-            "quiz_id": 7,
-            "text": "Your friends describe you as...",
-            "order": 1
-        },
-        {
-            "id": 72,
-            "quiz_id": 7,
-            "text": "Your biggest strength is...",
-            "order": 2
-        },
-        {
-            "id": 73,
-            "quiz_id": 7,
-            "text": "When facing a challenge, you...",
-            "order": 3
-        },
-        {
-            "id": 74,
-            "quiz_id": 7,
-            "text": "Your vibe in a group is...",
-            "order": 4
-        },
-        {
-            "id": 75,
-            "quiz_id": 7,
-            "text": "Pick a hobby:",
-            "order": 5
-        },
-        {
-            "id": 76,
-            "quiz_id": 7,
-            "text": "How do you show care?",
-            "order": 6
-        },
-        {
-            "id": 77,
-            "quiz_id": 7,
-            "text": "Your biggest fear is...",
-            "order": 7
-        },
-        {
-            "id": 78,
-            "quiz_id": 7,
-            "text": "Your energy is...",
-            "order": 8
-        },
-        {
-            "id": 79,
-            "quiz_id": 7,
-            "text": "In stressful situations, you...",
-            "order": 9
-        },
-        {
-            "id": 80,
-            "quiz_id": 7,
-            "text": "Your life motto would be...",
             "order": 10
         }
     ],
@@ -5785,406 +5725,6 @@
             "target_id": 30
         },
         {
-            "id": 634,
-            "question_id": 152,
-            "text": "A small dragon that follows your orders",
-            "order": 1,
-            "target_type": "group",
-            "target_id": 1
-        },
-        {
-            "id": 635,
-            "question_id": 152,
-            "text": "A glowing fox that whispers secrets",
-            "order": 2,
-            "target_type": "group",
-            "target_id": 2
-        },
-        {
-            "id": 636,
-            "question_id": 152,
-            "text": "A mischievous raccoon that gets into everything",
-            "order": 3,
-            "target_type": "group",
-            "target_id": 3
-        },
-        {
-            "id": 637,
-            "question_id": 152,
-            "text": "A tiny unicorn that only appears when you\u2019re happy",
-            "order": 4,
-            "target_type": "group",
-            "target_id": 4
-        },
-        {
-            "id": 638,
-            "question_id": 152,
-            "text": "A shape-shifting cat that mirrors your moods",
-            "order": 5,
-            "target_type": "group",
-            "target_id": 5
-        },
-        {
-            "id": 639,
-            "question_id": 151,
-            "text": "Explore the mysterious ruins and discover secrets",
-            "order": 1,
-            "target_type": "group",
-            "target_id": 1
-        },
-        {
-            "id": 640,
-            "question_id": 151,
-            "text": "Chill under a glowing tree and write your thoughts in a journal",
-            "order": 2,
-            "target_type": "group",
-            "target_id": 2
-        },
-        {
-            "id": 641,
-            "question_id": 151,
-            "text": "Run through the streets shouting to challenge anyone you see",
-            "order": 3,
-            "target_type": "group",
-            "target_id": 3
-        },
-        {
-            "id": 642,
-            "question_id": 151,
-            "text": "Build a whimsical treehouse with magical decorations",
-            "order": 4,
-            "target_type": "group",
-            "target_id": 4
-        },
-        {
-            "id": 643,
-            "question_id": 151,
-            "text": "Break all the rules and invent a new game the locals never heard of",
-            "order": 5,
-            "target_type": "group",
-            "target_id": 5
-        },
-        {
-            "id": 644,
-            "question_id": 153,
-            "text": "A mirror that shows hidden truths",
-            "order": 1,
-            "target_type": "group",
-            "target_id": 1
-        },
-        {
-            "id": 645,
-            "question_id": 153,
-            "text": "A book that writes your daydreams automatically",
-            "order": 2,
-            "target_type": "group",
-            "target_id": 2
-        },
-        {
-            "id": 646,
-            "question_id": 153,
-            "text": "A pair of boots that make you run faster than anyone",
-            "order": 3,
-            "target_type": "group",
-            "target_id": 3
-        },
-        {
-            "id": 647,
-            "question_id": 153,
-            "text": "A paintbrush that brings drawings to life",
-            "order": 4,
-            "target_type": "group",
-            "target_id": 4
-        },
-        {
-            "id": 648,
-            "question_id": 153,
-            "text": "A crystal that changes color depending on your mood",
-            "order": 5,
-            "target_type": "group",
-            "target_id": 5
-        },
-        {
-            "id": 649,
-            "question_id": 154,
-            "text": "Mystery solver",
-            "order": 1,
-            "target_type": "group",
-            "target_id": 1
-        },
-        {
-            "id": 650,
-            "question_id": 154,
-            "text": "Dreamer",
-            "order": 2,
-            "target_type": "group",
-            "target_id": 2
-        },
-        {
-            "id": 651,
-            "question_id": 154,
-            "text": "Chaos starter",
-            "order": 3,
-            "target_type": "group",
-            "target_id": 3
-        },
-        {
-            "id": 652,
-            "question_id": 154,
-            "text": "Creative wizard",
-            "order": 4,
-            "target_type": "group",
-            "target_id": 4
-        },
-        {
-            "id": 653,
-            "question_id": 154,
-            "text": "Rebel thinker",
-            "order": 5,
-            "target_type": "group",
-            "target_id": 5
-        },
-        {
-            "id": 654,
-            "question_id": 155,
-            "text": "Dark chocolate with hidden spices",
-            "order": 1,
-            "target_type": "group",
-            "target_id": 1
-        },
-        {
-            "id": 655,
-            "question_id": 155,
-            "text": "Cotton candy flavoured popcorn",
-            "order": 2,
-            "target_type": "group",
-            "target_id": 2
-        },
-        {
-            "id": 656,
-            "question_id": 155,
-            "text": "Spicy ramen",
-            "order": 3,
-            "target_type": "group",
-            "target_id": 3
-        },
-        {
-            "id": 657,
-            "question_id": 155,
-            "text": "Rainbow macarons",
-            "order": 4,
-            "target_type": "group",
-            "target_id": 4
-        },
-        {
-            "id": 658,
-            "question_id": 155,
-            "text": "Sour gummy candies",
-            "order": 5,
-            "target_type": "group",
-            "target_id": 5
-        },
-        {
-            "id": 659,
-            "question_id": 156,
-            "text": "Deep purple",
-            "order": 1,
-            "target_type": "group",
-            "target_id": 1
-        },
-        {
-            "id": 660,
-            "question_id": 156,
-            "text": "Soft blue",
-            "order": 2,
-            "target_type": "group",
-            "target_id": 2
-        },
-        {
-            "id": 661,
-            "question_id": 156,
-            "text": "Fiery red",
-            "order": 3,
-            "target_type": "group",
-            "target_id": 3
-        },
-        {
-            "id": 662,
-            "question_id": 156,
-            "text": "Pastel pink",
-            "order": 4,
-            "target_type": "group",
-            "target_id": 4
-        },
-        {
-            "id": 663,
-            "question_id": 156,
-            "text": "Neon green",
-            "order": 5,
-            "target_type": "group",
-            "target_id": 5
-        },
-        {
-            "id": 664,
-            "question_id": 157,
-            "text": "Solving a mystery or uncovering a secret",
-            "order": 1,
-            "target_type": "group",
-            "target_id": 1
-        },
-        {
-            "id": 665,
-            "question_id": 157,
-            "text": "Reading or stargazing in comfort",
-            "order": 2,
-            "target_type": "group",
-            "target_id": 2
-        },
-        {
-            "id": 666,
-            "question_id": 157,
-            "text": "Competing in a random mini challenge with friends",
-            "order": 3,
-            "target_type": "group",
-            "target_id": 3
-        },
-        {
-            "id": 667,
-            "question_id": 157,
-            "text": "Making crafts or designing something new",
-            "order": 4,
-            "target_type": "group",
-            "target_id": 4
-        },
-        {
-            "id": 668,
-            "question_id": 157,
-            "text": "Breaking a boring routine and trying something wild",
-            "order": 5,
-            "target_type": "group",
-            "target_id": 5
-        },
-        {
-            "id": 669,
-            "question_id": 158,
-            "text": "Hauntingly beautiful with tension",
-            "order": 1,
-            "target_type": "group",
-            "target_id": 1
-        },
-        {
-            "id": 670,
-            "question_id": 158,
-            "text": "Soft, dreamy, and heartfelt",
-            "order": 2,
-            "target_type": "group",
-            "target_id": 2
-        },
-        {
-            "id": 671,
-            "question_id": 158,
-            "text": "Fast, loud, and intense",
-            "order": 3,
-            "target_type": "group",
-            "target_id": 3
-        },
-        {
-            "id": 672,
-            "question_id": 158,
-            "text": "Light, magical, playful",
-            "order": 4,
-            "target_type": "group",
-            "target_id": 4
-        },
-        {
-            "id": 673,
-            "question_id": 158,
-            "text": "Edgy, experimental, unpredictable",
-            "order": 5,
-            "target_type": "group",
-            "target_id": 5
-        },
-        {
-            "id": 674,
-            "question_id": 159,
-            "text": "Seeing hidden truths",
-            "order": 1,
-            "target_type": "group",
-            "target_id": 1
-        },
-        {
-            "id": 675,
-            "question_id": 159,
-            "text": "Shaping dreams into reality",
-            "order": 2,
-            "target_type": "group",
-            "target_id": 2
-        },
-        {
-            "id": 676,
-            "question_id": 159,
-            "text": "Super speed and strength",
-            "order": 3,
-            "target_type": "group",
-            "target_id": 3
-        },
-        {
-            "id": 677,
-            "question_id": 159,
-            "text": "Creating illusions and wonders",
-            "order": 4,
-            "target_type": "group",
-            "target_id": 4
-        },
-        {
-            "id": 678,
-            "question_id": 159,
-            "text": "Chaos manipulation",
-            "order": 5,
-            "target_type": "group",
-            "target_id": 5
-        },
-        {
-            "id": 679,
-            "question_id": 160,
-            "text": "\u201cDiscover the unseen.\u201d",
-            "order": 1,
-            "target_type": "group",
-            "target_id": 1
-        },
-        {
-            "id": 680,
-            "question_id": 160,
-            "text": "\u201cDream freely and feel deeply.\u201d",
-            "order": 2,
-            "target_type": "group",
-            "target_id": 2
-        },
-        {
-            "id": 681,
-            "question_id": 160,
-            "text": "\u201cPush limits, break boundaries.\u201d",
-            "order": 3,
-            "target_type": "group",
-            "target_id": 3
-        },
-        {
-            "id": 682,
-            "question_id": 160,
-            "text": "\u201cCreate beauty wherever you go.\u201d",
-            "order": 4,
-            "target_type": "group",
-            "target_id": 4
-        },
-        {
-            "id": 683,
-            "question_id": 160,
-            "text": "\u201cChallenge everything and define your path.\u201d",
-            "order": 5,
-            "target_type": "group",
-            "target_id": 5
-        },
-        {
             "id": 684,
             "question_id": 91,
             "text": "Nishimura Riki",
@@ -6599,6 +6139,1126 @@
             "order": 2,
             "target_type": "member",
             "target_id": null
+        },
+        {
+            "id": 736,
+            "question_id": 171,
+            "text": "You suddenly get inspired and spend the day creating something.",
+            "order": 1,
+            "target_type": "member",
+            "target_id": 31
+        },
+        {
+            "id": 737,
+            "question_id": 171,
+            "text": "You clean your space, get comfortable, and enjoy a peaceful day.",
+            "order": 2,
+            "target_type": "member",
+            "target_id": 32
+        },
+        {
+            "id": 738,
+            "question_id": 171,
+            "text": "You immediately message your friends and make plans.",
+            "order": 3,
+            "target_type": "member",
+            "target_id": 33
+        },
+        {
+            "id": 739,
+            "question_id": 171,
+            "text": "You stay home, do your own thing, and enjoy having no obligations.",
+            "order": 4,
+            "target_type": "member",
+            "target_id": 34
+        },
+        {
+            "id": 740,
+            "question_id": 171,
+            "text": "You find something fun to do and somehow turn it into an adventure.",
+            "order": 5,
+            "target_type": "member",
+            "target_id": 35
+        },
+        {
+            "id": 741,
+            "question_id": 171,
+            "text": "You stay in bed for an unreasonable amount of time and enjoy it.",
+            "order": 6,
+            "target_type": "member",
+            "target_id": 36
+        },
+        {
+            "id": 742,
+            "question_id": 171,
+            "text": "You spend the entire day bothering your friends for entertainment.",
+            "order": 7,
+            "target_type": "member",
+            "target_id": 37
+        },
+        {
+            "id": 743,
+            "question_id": 171,
+            "text": "You actually use the free time productively and get things done.",
+            "order": 8,
+            "target_type": "member",
+            "target_id": 38
+        },
+        {
+            "id": 744,
+            "question_id": 172,
+            "text": "Help them figure out what to do next.",
+            "order": 1,
+            "target_type": "member",
+            "target_id": 31
+        },
+        {
+            "id": 745,
+            "question_id": 172,
+            "text": "Quietly stay beside them and make them feel safe.",
+            "order": 2,
+            "target_type": "member",
+            "target_id": 32
+        },
+        {
+            "id": 746,
+            "question_id": 172,
+            "text": "Try to cheer them up and get them laughing.",
+            "order": 3,
+            "target_type": "member",
+            "target_id": 33
+        },
+        {
+            "id": 747,
+            "question_id": 172,
+            "text": "Give them space but make sure they know you're there.",
+            "order": 4,
+            "target_type": "member",
+            "target_id": 34
+        },
+        {
+            "id": 748,
+            "question_id": 172,
+            "text": "Give them a huge amount of affection and emotional support.",
+            "order": 5,
+            "target_type": "member",
+            "target_id": 35
+        },
+        {
+            "id": 749,
+            "question_id": 172,
+            "text": "Distract them with something ridiculous.",
+            "order": 6,
+            "target_type": "member",
+            "target_id": 36
+        },
+        {
+            "id": 750,
+            "question_id": 172,
+            "text": "Refuse to let them stay sad and start causing chaos.",
+            "order": 7,
+            "target_type": "member",
+            "target_id": 37
+        },
+        {
+            "id": 751,
+            "question_id": 172,
+            "text": "Give them honest advice and help them deal with the problem.",
+            "order": 8,
+            "target_type": "member",
+            "target_id": 38
+        },
+        {
+            "id": 752,
+            "question_id": 173,
+            "text": "Open it immediately. There has to be a story behind it.",
+            "order": 1,
+            "target_type": "member",
+            "target_id": 31
+        },
+        {
+            "id": 753,
+            "question_id": 173,
+            "text": "Inspect it carefully first. Something feels suspicious.",
+            "order": 2,
+            "target_type": "member",
+            "target_id": 32
+        },
+        {
+            "id": 754,
+            "question_id": 173,
+            "text": "Convince your friends to come through it with you.",
+            "order": 3,
+            "target_type": "member",
+            "target_id": 33
+        },
+        {
+            "id": 755,
+            "question_id": 173,
+            "text": "Stand there wondering why this somehow became your problem.",
+            "order": 4,
+            "target_type": "member",
+            "target_id": 34
+        },
+        {
+            "id": 756,
+            "question_id": 173,
+            "text": "Open it because you absolutely need to know what's inside.",
+            "order": 5,
+            "target_type": "member",
+            "target_id": 35
+        },
+        {
+            "id": 757,
+            "question_id": 173,
+            "text": "Take a picture and seriously consider walking away.",
+            "order": 6,
+            "target_type": "member",
+            "target_id": 36
+        },
+        {
+            "id": 758,
+            "question_id": 173,
+            "text": "Open it just to see what happens.",
+            "order": 7,
+            "target_type": "member",
+            "target_id": 37
+        },
+        {
+            "id": 759,
+            "question_id": 173,
+            "text": "Check whether it's actually safe before doing anything stupid.",
+            "order": 8,
+            "target_type": "member",
+            "target_id": 38
+        },
+        {
+            "id": 760,
+            "question_id": 174,
+            "text": "\u201cYou have your own way of doing things.\u201d",
+            "order": 1,
+            "target_type": "member",
+            "target_id": 31
+        },
+        {
+            "id": 761,
+            "question_id": 174,
+            "text": "\u201cI always feel comfortable around you.\u201d",
+            "order": 2,
+            "target_type": "member",
+            "target_id": 32
+        },
+        {
+            "id": 762,
+            "question_id": 174,
+            "text": "\u201cYou make everything more fun.\u201d",
+            "order": 3,
+            "target_type": "member",
+            "target_id": 33
+        },
+        {
+            "id": 763,
+            "question_id": 174,
+            "text": "\u201cYou're really interesting once you get to know you.\u201d",
+            "order": 4,
+            "target_type": "member",
+            "target_id": 34
+        },
+        {
+            "id": 764,
+            "question_id": 174,
+            "text": "\u201cYou care about people so deeply.\u201d",
+            "order": 5,
+            "target_type": "member",
+            "target_id": 35
+        },
+        {
+            "id": 765,
+            "question_id": 174,
+            "text": "\u201cYou're effortlessly cool.\u201d",
+            "order": 6,
+            "target_type": "member",
+            "target_id": 36
+        },
+        {
+            "id": 766,
+            "question_id": 174,
+            "text": "\u201cYou're impossible to forget.\u201d",
+            "order": 7,
+            "target_type": "member",
+            "target_id": 37
+        },
+        {
+            "id": 767,
+            "question_id": 174,
+            "text": "\u201cI know I can always rely on you.\u201d",
+            "order": 8,
+            "target_type": "member",
+            "target_id": 38
+        },
+        {
+            "id": 768,
+            "question_id": 175,
+            "text": "The leader who somehow gets everyone moving in the same direction.",
+            "order": 1,
+            "target_type": "member",
+            "target_id": 31
+        },
+        {
+            "id": 769,
+            "question_id": 175,
+            "text": "The elegant healer who keeps everyone calm.",
+            "order": 2,
+            "target_type": "member",
+            "target_id": 32
+        },
+        {
+            "id": 770,
+            "question_id": 175,
+            "text": "The cheerful adventurer who keeps morale high.",
+            "order": 3,
+            "target_type": "member",
+            "target_id": 33
+        },
+        {
+            "id": 771,
+            "question_id": 175,
+            "text": "The mysterious traveler who knows more than they admit.",
+            "order": 4,
+            "target_type": "member",
+            "target_id": 34
+        },
+        {
+            "id": 772,
+            "question_id": 175,
+            "text": "The fearless warrior who protects everyone.",
+            "order": 5,
+            "target_type": "member",
+            "target_id": 35
+        },
+        {
+            "id": 773,
+            "question_id": 175,
+            "text": "The wandering musician who accidentally gets involved in everything.",
+            "order": 6,
+            "target_type": "member",
+            "target_id": 36
+        },
+        {
+            "id": 774,
+            "question_id": 175,
+            "text": "The chaotic rogue who somehow always escapes.",
+            "order": 7,
+            "target_type": "member",
+            "target_id": 37
+        },
+        {
+            "id": 775,
+            "question_id": 175,
+            "text": "The ridiculously strong fighter who solves problems directly.",
+            "order": 8,
+            "target_type": "member",
+            "target_id": 38
+        },
+        {
+            "id": 776,
+            "question_id": 176,
+            "text": "Someone had an idea and you immediately want to discuss it.",
+            "order": 1,
+            "target_type": "member",
+            "target_id": 31
+        },
+        {
+            "id": 777,
+            "question_id": 176,
+            "text": "Someone needs help with something.",
+            "order": 2,
+            "target_type": "member",
+            "target_id": 32
+        },
+        {
+            "id": 778,
+            "question_id": 176,
+            "text": "Someone suggested doing something tomorrow.",
+            "order": 3,
+            "target_type": "member",
+            "target_id": 33
+        },
+        {
+            "id": 779,
+            "question_id": 176,
+            "text": "You have no idea why everyone is awake.",
+            "order": 4,
+            "target_type": "member",
+            "target_id": 34
+        },
+        {
+            "id": 780,
+            "question_id": 176,
+            "text": "Someone sent something emotional and now everyone is talking.",
+            "order": 5,
+            "target_type": "member",
+            "target_id": 35
+        },
+        {
+            "id": 781,
+            "question_id": 176,
+            "text": "Someone posted something completely random.",
+            "order": 6,
+            "target_type": "member",
+            "target_id": 36
+        },
+        {
+            "id": 782,
+            "question_id": 176,
+            "text": "You started an argument for entertainment.",
+            "order": 7,
+            "target_type": "member",
+            "target_id": 37
+        },
+        {
+            "id": 783,
+            "question_id": 176,
+            "text": "Someone asked a question and you gave the most practical answer.",
+            "order": 8,
+            "target_type": "member",
+            "target_id": 38
+        },
+        {
+            "id": 784,
+            "question_id": 177,
+            "text": "Collecting unusual objects.",
+            "order": 1,
+            "target_type": "member",
+            "target_id": 31
+        },
+        {
+            "id": 785,
+            "question_id": 177,
+            "text": "Building tiny detailed things for hours.",
+            "order": 2,
+            "target_type": "member",
+            "target_id": 32
+        },
+        {
+            "id": 786,
+            "question_id": 177,
+            "text": "Becoming weirdly competitive at a random game.",
+            "order": 3,
+            "target_type": "member",
+            "target_id": 33
+        },
+        {
+            "id": 787,
+            "question_id": 177,
+            "text": "Learning an oddly specific skill nobody asked for.",
+            "order": 4,
+            "target_type": "member",
+            "target_id": 34
+        },
+        {
+            "id": 788,
+            "question_id": 177,
+            "text": "Collecting cute things despite looking intimidating.",
+            "order": 5,
+            "target_type": "member",
+            "target_id": 35
+        },
+        {
+            "id": 789,
+            "question_id": 177,
+            "text": "Watching anime until sunrise.",
+            "order": 6,
+            "target_type": "member",
+            "target_id": 36
+        },
+        {
+            "id": 790,
+            "question_id": 177,
+            "text": "Collecting clothes you absolutely did not need.",
+            "order": 7,
+            "target_type": "member",
+            "target_id": 37
+        },
+        {
+            "id": 791,
+            "question_id": 177,
+            "text": "Seeing how many physical objects you can break by accident.",
+            "order": 8,
+            "target_type": "member",
+            "target_id": 38
+        },
+        {
+            "id": 792,
+            "question_id": 178,
+            "text": "\u201cInteresting. Let's see what I can do with it.\u201d",
+            "order": 1,
+            "target_type": "member",
+            "target_id": 31
+        },
+        {
+            "id": 793,
+            "question_id": 178,
+            "text": "\u201cI'll try, but I'm preparing first.\u201d",
+            "order": 2,
+            "target_type": "member",
+            "target_id": 32
+        },
+        {
+            "id": 794,
+            "question_id": 178,
+            "text": "\u201cYES. When are we starting?\u201d",
+            "order": 3,
+            "target_type": "member",
+            "target_id": 33
+        },
+        {
+            "id": 795,
+            "question_id": 178,
+            "text": "\u201c...Why me?\u201d",
+            "order": 4,
+            "target_type": "member",
+            "target_id": 34
+        },
+        {
+            "id": 796,
+            "question_id": 178,
+            "text": "\u201cI'm nervous, but I'm doing it anyway.\u201d",
+            "order": 5,
+            "target_type": "member",
+            "target_id": 35
+        },
+        {
+            "id": 797,
+            "question_id": 178,
+            "text": "\u201cCan I go home instead?\u201d",
+            "order": 6,
+            "target_type": "member",
+            "target_id": 36
+        },
+        {
+            "id": 798,
+            "question_id": 178,
+            "text": "\u201cObviously I'm doing it.\u201d",
+            "order": 7,
+            "target_type": "member",
+            "target_id": 37
+        },
+        {
+            "id": 799,
+            "question_id": 178,
+            "text": "\u201cI'll figure it out.\u201d",
+            "order": 8,
+            "target_type": "member",
+            "target_id": 38
+        },
+        {
+            "id": 808,
+            "question_id": 180,
+            "text": "A colorful artist's studio overlooking a huge city.",
+            "order": 1,
+            "target_type": "member",
+            "target_id": 31
+        },
+        {
+            "id": 809,
+            "question_id": 180,
+            "text": "A warm bedroom during a rainy evening.",
+            "order": 2,
+            "target_type": "member",
+            "target_id": 32
+        },
+        {
+            "id": 810,
+            "question_id": 180,
+            "text": "An amusement park full of people and noise.",
+            "order": 3,
+            "target_type": "member",
+            "target_id": 33
+        },
+        {
+            "id": 811,
+            "question_id": 180,
+            "text": "A quiet moonlit beach where nobody else is around.",
+            "order": 4,
+            "target_type": "member",
+            "target_id": 34
+        },
+        {
+            "id": 812,
+            "question_id": 180,
+            "text": "A mountain at sunrise with something waiting to be conquered.",
+            "order": 5,
+            "target_type": "member",
+            "target_id": 35
+        },
+        {
+            "id": 813,
+            "question_id": 180,
+            "text": "A cozy room with snacks, music, and absolutely no plans.",
+            "order": 6,
+            "target_type": "member",
+            "target_id": 36
+        },
+        {
+            "id": 814,
+            "question_id": 180,
+            "text": "A crowded night market where something chaotic is always happening.",
+            "order": 7,
+            "target_type": "member",
+            "target_id": 37
+        },
+        {
+            "id": 815,
+            "question_id": 180,
+            "text": "A peaceful training ground where you've been working toward one goal.",
+            "order": 8,
+            "target_type": "member",
+            "target_id": 38
+        },
+        {
+            "id": 816,
+            "question_id": 151,
+            "text": "Explore the mysterious ruins and discover secrets",
+            "order": 1,
+            "target_type": "group",
+            "target_id": 1
+        },
+        {
+            "id": 817,
+            "question_id": 151,
+            "text": "Chill under a glowing tree and write your thoughts in a journal",
+            "order": 2,
+            "target_type": "group",
+            "target_id": 2
+        },
+        {
+            "id": 818,
+            "question_id": 151,
+            "text": "Run through the streets shouting to challenge anyone you see",
+            "order": 3,
+            "target_type": "group",
+            "target_id": 3
+        },
+        {
+            "id": 819,
+            "question_id": 151,
+            "text": "Build a whimsical treehouse with magical decorations",
+            "order": 4,
+            "target_type": "group",
+            "target_id": 4
+        },
+        {
+            "id": 820,
+            "question_id": 151,
+            "text": "Break all the rules and invent a new game the locals never heard of",
+            "order": 5,
+            "target_type": "group",
+            "target_id": 5
+        },
+        {
+            "id": 821,
+            "question_id": 151,
+            "text": "Set off on an adventure to discover what lies beyond the horizon.",
+            "order": 6,
+            "target_type": "group",
+            "target_id": 6
+        },
+        {
+            "id": 822,
+            "question_id": 152,
+            "text": "A small dragon that follows your orders",
+            "order": 1,
+            "target_type": "group",
+            "target_id": 1
+        },
+        {
+            "id": 823,
+            "question_id": 152,
+            "text": "A glowing fox that whispers secrets",
+            "order": 2,
+            "target_type": "group",
+            "target_id": 2
+        },
+        {
+            "id": 824,
+            "question_id": 152,
+            "text": "A mischievous raccoon that gets into everything",
+            "order": 3,
+            "target_type": "group",
+            "target_id": 3
+        },
+        {
+            "id": 825,
+            "question_id": 152,
+            "text": "A tiny unicorn that only appears when you\u2019re happy",
+            "order": 4,
+            "target_type": "group",
+            "target_id": 4
+        },
+        {
+            "id": 826,
+            "question_id": 152,
+            "text": "A shape-shifting cat that mirrors your moods",
+            "order": 5,
+            "target_type": "group",
+            "target_id": 5
+        },
+        {
+            "id": 827,
+            "question_id": 152,
+            "text": "A magical black cat that can guide you.",
+            "order": 6,
+            "target_type": "group",
+            "target_id": 6
+        },
+        {
+            "id": 828,
+            "question_id": 153,
+            "text": "A mirror that shows hidden truths",
+            "order": 1,
+            "target_type": "group",
+            "target_id": 1
+        },
+        {
+            "id": 829,
+            "question_id": 153,
+            "text": "A book that writes your daydreams automatically",
+            "order": 2,
+            "target_type": "group",
+            "target_id": 2
+        },
+        {
+            "id": 830,
+            "question_id": 153,
+            "text": "A pair of boots that make you run faster than anyone",
+            "order": 3,
+            "target_type": "group",
+            "target_id": 3
+        },
+        {
+            "id": 831,
+            "question_id": 153,
+            "text": "A paintbrush that brings drawings to life",
+            "order": 4,
+            "target_type": "group",
+            "target_id": 4
+        },
+        {
+            "id": 832,
+            "question_id": 153,
+            "text": "A crystal that changes color depending on your mood",
+            "order": 5,
+            "target_type": "group",
+            "target_id": 5
+        },
+        {
+            "id": 833,
+            "question_id": 153,
+            "text": "An ancient compass that points toward your destiny.",
+            "order": 6,
+            "target_type": "group",
+            "target_id": 6
+        },
+        {
+            "id": 834,
+            "question_id": 154,
+            "text": "Mystery solver",
+            "order": 1,
+            "target_type": "group",
+            "target_id": 1
+        },
+        {
+            "id": 835,
+            "question_id": 154,
+            "text": "Dreamer",
+            "order": 2,
+            "target_type": "group",
+            "target_id": 2
+        },
+        {
+            "id": 836,
+            "question_id": 154,
+            "text": "Chaos starter",
+            "order": 3,
+            "target_type": "group",
+            "target_id": 3
+        },
+        {
+            "id": 837,
+            "question_id": 154,
+            "text": "Creative wizard",
+            "order": 4,
+            "target_type": "group",
+            "target_id": 4
+        },
+        {
+            "id": 838,
+            "question_id": 154,
+            "text": "Rebel thinker",
+            "order": 5,
+            "target_type": "group",
+            "target_id": 5
+        },
+        {
+            "id": 839,
+            "question_id": 154,
+            "text": "Fearless adventurer",
+            "order": 6,
+            "target_type": "group",
+            "target_id": 6
+        },
+        {
+            "id": 846,
+            "question_id": 156,
+            "text": "Deep purple",
+            "order": 1,
+            "target_type": "group",
+            "target_id": 1
+        },
+        {
+            "id": 847,
+            "question_id": 156,
+            "text": "Soft yellow",
+            "order": 2,
+            "target_type": "group",
+            "target_id": 2
+        },
+        {
+            "id": 848,
+            "question_id": 156,
+            "text": "Fiery red",
+            "order": 3,
+            "target_type": "group",
+            "target_id": 3
+        },
+        {
+            "id": 849,
+            "question_id": 156,
+            "text": "Pastel pink",
+            "order": 4,
+            "target_type": "group",
+            "target_id": 4
+        },
+        {
+            "id": 850,
+            "question_id": 156,
+            "text": "Neon green",
+            "order": 5,
+            "target_type": "group",
+            "target_id": 5
+        },
+        {
+            "id": 851,
+            "question_id": 156,
+            "text": "Deep ocean blue",
+            "order": 6,
+            "target_type": "group",
+            "target_id": 6
+        },
+        {
+            "id": 858,
+            "question_id": 158,
+            "text": "Hauntingly beautiful with tension",
+            "order": 1,
+            "target_type": "group",
+            "target_id": 1
+        },
+        {
+            "id": 859,
+            "question_id": 158,
+            "text": "Soft, dreamy, and heartfelt",
+            "order": 2,
+            "target_type": "group",
+            "target_id": 2
+        },
+        {
+            "id": 860,
+            "question_id": 158,
+            "text": "Fast, loud, and intense",
+            "order": 3,
+            "target_type": "group",
+            "target_id": 3
+        },
+        {
+            "id": 861,
+            "question_id": 158,
+            "text": "Light, magical, playful",
+            "order": 4,
+            "target_type": "group",
+            "target_id": 4
+        },
+        {
+            "id": 862,
+            "question_id": 158,
+            "text": "Edgy, experimental, unpredictable",
+            "order": 5,
+            "target_type": "group",
+            "target_id": 5
+        },
+        {
+            "id": 863,
+            "question_id": 158,
+            "text": "Powerful, dramatic, flashy",
+            "order": 6,
+            "target_type": "group",
+            "target_id": 6
+        },
+        {
+            "id": 870,
+            "question_id": 160,
+            "text": "\u201cDiscover the unseen.\u201d",
+            "order": 1,
+            "target_type": "group",
+            "target_id": 1
+        },
+        {
+            "id": 871,
+            "question_id": 160,
+            "text": "\u201cDream freely and feel deeply.\u201d",
+            "order": 2,
+            "target_type": "group",
+            "target_id": 2
+        },
+        {
+            "id": 872,
+            "question_id": 160,
+            "text": "\u201cPush limits, break boundaries.\u201d",
+            "order": 3,
+            "target_type": "group",
+            "target_id": 3
+        },
+        {
+            "id": 873,
+            "question_id": 160,
+            "text": "\u201cCreate beauty wherever you go.\u201d",
+            "order": 4,
+            "target_type": "group",
+            "target_id": 4
+        },
+        {
+            "id": 874,
+            "question_id": 160,
+            "text": "\u201cChallenge everything and define your path.\u201d",
+            "order": 5,
+            "target_type": "group",
+            "target_id": 5
+        },
+        {
+            "id": 875,
+            "question_id": 160,
+            "text": "\u201cFollow your dreams, and never be afraid to explore the unknown.\u201d",
+            "order": 6,
+            "target_type": "group",
+            "target_id": 6
+        },
+        {
+            "id": 876,
+            "question_id": 159,
+            "text": "Seeing masked truths",
+            "order": 1,
+            "target_type": "group",
+            "target_id": 1
+        },
+        {
+            "id": 877,
+            "question_id": 159,
+            "text": "Shaping dreams into reality",
+            "order": 2,
+            "target_type": "group",
+            "target_id": 2
+        },
+        {
+            "id": 878,
+            "question_id": 159,
+            "text": "Super speed and strength",
+            "order": 3,
+            "target_type": "group",
+            "target_id": 3
+        },
+        {
+            "id": 879,
+            "question_id": 159,
+            "text": "Creating illusions and wonders",
+            "order": 4,
+            "target_type": "group",
+            "target_id": 4
+        },
+        {
+            "id": 880,
+            "question_id": 159,
+            "text": "Chaos manipulation",
+            "order": 5,
+            "target_type": "group",
+            "target_id": 5
+        },
+        {
+            "id": 881,
+            "question_id": 159,
+            "text": "Waterbending",
+            "order": 6,
+            "target_type": "group",
+            "target_id": 6
+        },
+        {
+            "id": 888,
+            "question_id": 179,
+            "text": "You find someone interesting to talk to.",
+            "order": 1,
+            "target_type": "member",
+            "target_id": 31
+        },
+        {
+            "id": 889,
+            "question_id": 179,
+            "text": "You find a quiet corner and enjoy yourself.",
+            "order": 2,
+            "target_type": "member",
+            "target_id": 32
+        },
+        {
+            "id": 890,
+            "question_id": 179,
+            "text": "Somehow you make new friends within five minutes.",
+            "order": 3,
+            "target_type": "member",
+            "target_id": 33
+        },
+        {
+            "id": 891,
+            "question_id": 179,
+            "text": "You are completely fine being alone.",
+            "order": 4,
+            "target_type": "member",
+            "target_id": 34
+        },
+        {
+            "id": 892,
+            "question_id": 179,
+            "text": "You eventually find someone you can genuinely connect with.",
+            "order": 5,
+            "target_type": "member",
+            "target_id": 35
+        },
+        {
+            "id": 893,
+            "question_id": 179,
+            "text": "You check your phone and wonder when you can leave.",
+            "order": 6,
+            "target_type": "member",
+            "target_id": 36
+        },
+        {
+            "id": 894,
+            "question_id": 179,
+            "text": "You immediately start looking for your friends.",
+            "order": 7,
+            "target_type": "member",
+            "target_id": 37
+        },
+        {
+            "id": 895,
+            "question_id": 179,
+            "text": "You don't really mind and just do your own thing.",
+            "order": 8,
+            "target_type": "member",
+            "target_id": 38
+        },
+        {
+            "id": 896,
+            "question_id": 155,
+            "text": "Dark chocolate with hidden spices",
+            "order": 1,
+            "target_type": "group",
+            "target_id": 1
+        },
+        {
+            "id": 897,
+            "question_id": 155,
+            "text": "Cotton candy flavoured popcorn",
+            "order": 2,
+            "target_type": "group",
+            "target_id": 2
+        },
+        {
+            "id": 898,
+            "question_id": 155,
+            "text": "Spicy ramen",
+            "order": 3,
+            "target_type": "group",
+            "target_id": 3
+        },
+        {
+            "id": 899,
+            "question_id": 155,
+            "text": "Rainbow macarons",
+            "order": 4,
+            "target_type": "group",
+            "target_id": 4
+        },
+        {
+            "id": 900,
+            "question_id": 155,
+            "text": "Sour gummy candies",
+            "order": 5,
+            "target_type": "group",
+            "target_id": 5
+        },
+        {
+            "id": 901,
+            "question_id": 155,
+            "text": "Cheap caviar",
+            "order": 6,
+            "target_type": "group",
+            "target_id": 6
+        },
+        {
+            "id": 902,
+            "question_id": 157,
+            "text": "Solving a mystery or uncovering a secret",
+            "order": 1,
+            "target_type": "group",
+            "target_id": 1
+        },
+        {
+            "id": 903,
+            "question_id": 157,
+            "text": "Reading or stargazing in comfort",
+            "order": 2,
+            "target_type": "group",
+            "target_id": 2
+        },
+        {
+            "id": 904,
+            "question_id": 157,
+            "text": "Competing in a random mini challenge with friends",
+            "order": 3,
+            "target_type": "group",
+            "target_id": 3
+        },
+        {
+            "id": 905,
+            "question_id": 157,
+            "text": "Making crafts or designing something new",
+            "order": 4,
+            "target_type": "group",
+            "target_id": 4
+        },
+        {
+            "id": 906,
+            "question_id": 157,
+            "text": "Breaking a boring routine and trying something wild",
+            "order": 5,
+            "target_type": "group",
+            "target_id": 5
+        },
+        {
+            "id": 907,
+            "question_id": 157,
+            "text": "Going somewhere completely new and making unforgettable memories.",
+            "order": 6,
+            "target_type": "group",
+            "target_id": 6
         }
     ],
     "members": [
@@ -7482,11 +8142,12 @@
         },
         "12": {
             "group": {
-                "1": 118,
-                "2": 169,
+                "1": 119,
+                "2": 170,
                 "3": 198,
-                "4": 20,
-                "5": 83
+                "4": 21,
+                "5": 83,
+                "6": 3
             }
         },
         "7": {
@@ -7511,7 +8172,9 @@
         },
         "13": {
             "member": {
-                "2": 1
+                "35": 1,
+                "31": 2,
+                "36": 1
             }
         },
         "4": {
