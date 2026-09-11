@@ -30,4 +30,20 @@
             <p class="muted" style="margin-top:.5rem;">Complete a quiz and your result will appear here.</p>
         </div>
     @endforelse
+
+    @if($results->hasPages())
+        <div class="profile-history-pagination">
+            <nav aria-label="Quiz history pages">
+                <div>
+                    @for($page = 1; $page <= $results->lastPage(); $page++)
+                        @if($page === $results->currentPage())
+                            <span aria-current="page"><span>{{ $page }}</span></span>
+                        @else
+                            <a href="{{ $results->url($page) }}">{{ $page }}</a>
+                        @endif
+                    @endfor
+                </div>
+            </nav>
+        </div>
+    @endif
 </section>

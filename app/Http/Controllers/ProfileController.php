@@ -25,7 +25,7 @@ class ProfileController extends Controller
         return view('profile.show', [
             'user' => $request->user(),
             'avatarMember' => $request->user()->avatarMember(),
-            'results' => $request->user()->quizResults()->latest()->get(),
+            'results' => $request->user()->quizResults()->latest()->paginate(10),
             'quizNames' => $quizNames,
             'groups' => $data['groups'] ?? [],
             'members' => $data['members'] ?? [],
