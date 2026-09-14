@@ -29,7 +29,7 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/profile/favourites', [ProfileController::class, 'updateFavorites'])->name('profile.favourites.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::prefix('admin')->name('admin.')->group(function () {
+    Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
         Route::get('/', function () { return view('admin.index'); })->name('index');
 
         Route::resource('groups', GroupController::class);
