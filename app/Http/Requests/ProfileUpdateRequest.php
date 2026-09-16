@@ -22,9 +22,6 @@ class ProfileUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        $data = json_decode(file_get_contents(resource_path('data/api.json')), true) ?? [];
-        $memberIds = array_column($data['members'] ?? [], 'id');
-
         return [
             'name' => ['required', 'string', 'max:255'],
             'bio' => ['nullable', 'string', 'max:160'],
@@ -36,7 +33,7 @@ class ProfileUpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
-            'avatar_member_id' => ['nullable', 'integer', Rule::in($memberIds)],
+            'avatar_member_id' => ['nullable', 'integer', Rule::exists('members', 'id')],
         ];
     }
 }

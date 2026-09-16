@@ -18,18 +18,13 @@ class FavoriteUpdateRequest extends FormRequest
 
     public function rules(): array
     {
-        $data = json_decode(file_get_contents(resource_path('data/api.json')), true) ?? [];
-        $groupIds = array_column($data['groups'] ?? [], 'id');
-        $memberIds = array_column($data['members'] ?? [], 'id');
-        $albumIds = array_column($data['albums'] ?? [], 'id');
-
         return [
             'favorite_groups' => ['array', 'size:3'],
-            'favorite_groups.*' => ['nullable', 'integer', Rule::in($groupIds)],
+            'favorite_groups.*' => ['nullable', 'integer', Rule::exists('groups', 'id')],
             'favorite_members' => ['array', 'size:3'],
-            'favorite_members.*' => ['nullable', 'integer', Rule::in($memberIds)],
+            'favorite_members.*' => ['nullable', 'integer', Rule::exists('members', 'id')],
             'favorite_albums' => ['array', 'size:3'],
-            'favorite_albums.*' => ['nullable', 'integer', Rule::in($albumIds)],
+            'favorite_albums.*' => ['nullable', 'integer', Rule::exists('albums', 'id')],
         ];
     }
 

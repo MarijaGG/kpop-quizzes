@@ -7,8 +7,7 @@
             <a href="{{ route('admin.index') }}" class="back-button">← Admin</a>
 
             @php
-                $json = json_decode(file_get_contents(resource_path('data/api.json')), true) ?? [];
-                $allGroups = array_map(function($i){ return (object)$i; }, $json['groups'] ?? []);
+                $allGroups = \App\Models\Group::orderBy('name')->get();
                 $selectedGroup = request('group_id');
             @endphp
             <div class="flex-1 flex justify-center">

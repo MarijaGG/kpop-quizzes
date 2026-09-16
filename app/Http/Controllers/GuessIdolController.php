@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\GuessIdolImage;
+use App\Models\Group;
+use App\Models\Member;
 use App\Models\QuizResult;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,9 +15,8 @@ class GuessIdolController extends Controller
 {
     public function index(): View
     {
-        $data = $this->data();
         return view('guess-idol.index', [
-            'groups' => $data['groups'] ?? [],
+            'groups' => Group::orderBy('name')->get()->map->toArray()->all(),
             'available' => GuessIdolImage::query()->select('group_id', 'difficulty')->distinct()->get(),
         ]);
     }
@@ -23,10 +24,8 @@ class GuessIdolController extends Controller
     public function start(Request $request): RedirectResponse
     {
         session()->forget(['guess_idol_result_saved', 'guess_idol_run']);
-        $data = $this->data();
-        $groupIds = array_column($data['groups'] ?? [], 'id');
         $validated = $request->validate([
-            'group_id' => ['required', 'integer', 'in:'.implode(',', $groupIds)],
+            'group_id' => ['required', 'integer', 'exists:groups,id'],
             'difficulty' => ['required', 'in:easy,medium,hard'],
         ]);
 
@@ -38,9 +37,7 @@ class GuessIdolController extends Controller
             return back()->withErrors(['difficulty' => 'This difficulty needs at least 5 images before it can be played.']);
         }
 
-        $members = collect($data['members'] ?? [])
-            ->filter(fn ($member) => (string) ($member['group_id'] ?? '') === (string) $validated['group_id'])
-            ->values();
+        $members = Member::where('group_id', $validated['group_id'])->get();
         if ($members->count() < 4) {
             return back()->withErrors(['group_id' => 'This group needs at least four members.']);
         }
@@ -76,9 +73,8 @@ class GuessIdolController extends Controller
             return redirect()->route('guess-idol.index');
         }
 
-        $data = $this->data();
         $question = $run['questions'][$run['index']];
-        $members = collect($data['members'] ?? [])->keyBy('id');
+        $members = Member::whereIn('id', $question['options'])->get()->keyBy('id');
         $options = collect($question['options'])->map(fn ($id) => $members[(int) $id] ?? null)->filter()->values();
 
         return view('guess-idol.take', [
@@ -124,10 +120,9 @@ class GuessIdolController extends Controller
             return redirect()->route('guess-idol.index');
         }
 
-        $data = $this->data();
         return view('guess-idol.result', [
             'run' => $run,
-            'group' => collect($data['groups'] ?? [])->firstWhere('id', $run['group_id']),
+            'group' => Group::find($run['group_id'])?->toArray(),
         ]);
     }
 
@@ -136,9 +131,7 @@ class GuessIdolController extends Controller
         if (! auth()->check() || session()->has('guess_idol_result_saved')) {
             return;
         }
-        $data = $this->data();
-        $group = collect($data['groups'] ?? [])->firstWhere('id', $run['group_id']);
-        $groupName = $group['name'] ?? 'TXT';
+        $groupName = Group::find($run['group_id'])?->name ?? 'TXT';
         $difficulty = ucfirst($run['difficulty']);
         QuizResult::create([
             'user_id' => auth()->id(),
@@ -154,8 +147,4 @@ class GuessIdolController extends Controller
         session(['guess_idol_result_saved' => true]);
     }
 
-    private function data(): array
-    {
-        return json_decode(file_get_contents(resource_path('data/api.json')), true) ?? [];
-    }
 }

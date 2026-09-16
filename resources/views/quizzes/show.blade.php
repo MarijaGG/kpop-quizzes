@@ -19,11 +19,10 @@
             </div>
 
             @php
-                $json = json_decode(file_get_contents(resource_path('data/api.json')), true) ?? [];
-                $quizStats = $json['quiz_stats'][$quiz->id] ?? [];
-                $members = $json['members'] ?? [];
-                $groups = $json['groups'] ?? [];
-                $albums = $json['albums'] ?? [];
+                $quizStats = $quizStats ?? [];
+                $members = $members ?? [];
+                $groups = $groups ?? [];
+                $albums = $albums ?? [];
             @endphp
 
             <div class="results-card">

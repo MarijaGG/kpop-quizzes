@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
         ]);
 
+        $this->call(ApiDataSeeder::class);
         $this->call(\Database\Seeders\RolesAndAdminSeeder::class);
     }
 }

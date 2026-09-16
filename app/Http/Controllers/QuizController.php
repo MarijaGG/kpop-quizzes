@@ -2,93 +2,75 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Album;
+use App\Models\Group;
+use App\Models\Member;
+use App\Models\Quiz;
 use App\Models\QuizResult;
 use Illuminate\Http\Request;
 
 class QuizController extends Controller
 {
-    public function index(\Illuminate\Http\Request $request)
+    public function index(Request $request)
     {
-        $json = json_decode(file_get_contents(resource_path('data/api.json')), true) ?? [];
-        $quizzes = $json['quizzes'] ?? [];
-        $groups = $json['groups'] ?? [];
-        // apply optional group filter: ?group=ID or ?group=none
         $groupFilter = $request->query('group');
-        if ($groupFilter !== null) {
-            if ($groupFilter === 'none') {
-                $quizzes = array_values(array_filter($quizzes, function($q){ return empty($q['group_id']) && empty($q['member_id']); }));
-            } else {
-                $quizzes = array_values(array_filter($quizzes, function($q) use ($groupFilter){ return (string)($q['group_id'] ?? '') === (string)$groupFilter; }));
-            }
+        $query = Quiz::query()->orderBy('id');
+
+        if ($groupFilter === 'none') {
+            $query->whereNull('group_id')->whereNull('member_id');
+        } elseif ($groupFilter !== null) {
+            $query->where('group_id', $groupFilter);
         }
-        // ensure objects and defaults
-        $quizzes = array_map(function($q){ return (object) array_merge(['image' => null, 'name' => 'Quiz '.($q['id'] ?? '?')], $q); }, $quizzes);
-        $groups = array_map(function($g){ return (object)$g; }, $groups);
-        return view('quizzes.index', ['quizzes' => $quizzes, 'groups' => $groups, 'groupFilter' => $groupFilter]);
+
+        return view('quizzes.index', [
+            'quizzes' => $query->get(),
+            'groups' => Group::orderBy('name')->get(),
+            'groupFilter' => $groupFilter,
+        ]);
     }
 
     public function show($id)
     {
-        $json = json_decode(file_get_contents(resource_path('data/api.json')), true) ?? [];
-        $quiz = null;
-        foreach ($json['quizzes'] ?? [] as $q) { if ((string)($q['id'] ?? '') === (string)$id) { $quiz = (object)$q; break; } }
-        if (! $quiz) { abort(404); }
-        $questions = array_values(array_filter($json['questions'] ?? [], function($q) use ($id){ return (string)($q['quiz_id'] ?? '') === (string)$id; }));
-        $count = count($questions);
-        return view('quizzes.show', ['quiz' => $quiz, 'questions_count' => $count]);
+        $quiz = Quiz::findOrFail($id);
+
+        return view('quizzes.show', [
+            'quiz' => $quiz,
+            'questions_count' => $quiz->questions()->count(),
+            'quizStats' => $quiz->settings['quiz_stats'] ?? [],
+            'members' => Member::orderBy('name')->get(),
+            'groups' => Group::orderBy('name')->get(),
+            'albums' => Album::orderBy('title')->get(),
+        ]);
     }
 
     public function start($id)
     {
         session()->forget("quiz_result_saved.$id");
-        $json = json_decode(file_get_contents(resource_path('data/api.json')), true) ?? [];
-        $questions = array_values(array_filter($json['questions'] ?? [], function($q) use ($id){ return (string)($q['quiz_id'] ?? '') === (string)$id; }));
-        if (empty($questions)) { return redirect()->route('quizzes.show', $id)->with('error','No questions'); }
-        // build run payload: shuffle questions and answers
-        shuffle($questions);
-        $run = ['quiz_id' => (int)$id, 'questions' => [], 'answers' => []];
-        // build answer lookups for robust matching
-        $allAnswers = $json['answers'] ?? [];
-        $answersByQuestionId = [];
-        foreach ($allAnswers as $a) {
-            $qid = isset($a['question_id']) ? (string)$a['question_id'] : null;
-            if ($qid === null) { continue; }
-            $answersByQuestionId[$qid][] = $a;
+        $quiz = Quiz::with('questions.answers')->findOrFail($id);
+        $questions = $quiz->questions->shuffle();
+
+        if ($questions->isEmpty()) {
+            return redirect()->route('quizzes.show', $id)->with('error', 'No questions');
         }
 
-        foreach ($questions as $q) {
-            $qs = ['id' => $q['id'], 'text' => $q['text'] ?? '', 'order' => $q['order'] ?? null];
-            $qid = (string)($q['id'] ?? '');
-            $answers = $answersByQuestionId[$qid] ?? [];
-
-            // fallback: some datasets store answers keyed by question order (1..N)
-            if (empty($answers) && isset($q['order'])) {
-                $answers = $answersByQuestionId[(string)($q['order'])] ?? [];
-            }
-
-            // fallback: maybe answers were saved with numeric keys cast differently; try loose match over all answers
-            if (empty($answers)) {
-                foreach ($allAnswers as $a) {
-                    if ((string)($a['question_id'] ?? '') === (string)$q['id'] || (string)($a['question_id'] ?? '') === (string)($q['order'] ?? '')) {
-                        $answers[] = $a;
-                    }
-                }
-            }
-
-            shuffle($answers);
-            $ansItems = [];
-            foreach ($answers as $a) {
-                $ansItems[] = [
-                    'id' => $a['id'],
-                    'text' => $a['text'] ?? '',
-                    'target_type' => $a['target_type'] ?? (!empty($a['member_id']) ? 'member' : null),
-                    'target_id' => $a['target_id'] ?? ($a['member_id'] ?? null),
-                ];
-            }
-            $qs['answers'] = $ansItems;
-            $run['questions'][] = $qs;
+        $run = ['quiz_id' => (int) $id, 'questions' => []];
+        foreach ($questions as $question) {
+            $run['questions'][] = [
+                'id' => $question->id,
+                'text' => $question->text,
+                'order' => $question->order,
+                'answers' => $question->answers->shuffle()->map(function ($answer) {
+                    $meta = $answer->meta ?? [];
+                    return [
+                        'id' => $answer->id,
+                        'text' => $answer->text,
+                        'target_type' => $meta['target_type'] ?? null,
+                        'target_id' => $meta['target_id'] ?? null,
+                    ];
+                })->values()->all(),
+            ];
         }
-        // save to session
+
         session(["quiz_run.$id" => ['quiz' => $run, 'index' => 0, 'responses' => []]]);
         return redirect()->route('quizzes.take', $id);
     }
@@ -96,262 +78,226 @@ class QuizController extends Controller
     public function take($id)
     {
         $state = session("quiz_run.$id");
-        if (empty($state)) { return redirect()->route('quizzes.start', $id); }
-        $run = $state['quiz'];
-        $index = $state['index'] ?? 0;
-        // defensive check: if the stored run questions are out of sync with the
-        // current JSON (for example after editing questions), regenerate the run
-        // by clearing the session and redirecting to start(). This prevents the
-        // take form from showing a single/partial question set.
-        $json = json_decode(file_get_contents(resource_path('data/api.json')), true) ?? [];
-        $currentQuestions = array_values(array_filter($json['questions'] ?? [], function($q) use ($id){ return (string)($q['quiz_id'] ?? '') === (string)$id; }));
-        $expectedCount = count($currentQuestions);
-        if ($expectedCount !== count($run['questions'])) {
-            session()->forget("quiz_run.$id");
+        if (empty($state)) {
             return redirect()->route('quizzes.start', $id);
         }
 
-        if (! isset($run['questions'][$index])) { return redirect()->route('quizzes.result', $id); }
-        $question = (object)$run['questions'][$index];
-        $total = count($run['questions']);
-        return view('quizzes.take', ['quiz_id' => $id, 'question' => $question, 'index' => $index, 'total' => $total]);
+        $run = $state['quiz'];
+        $index = $state['index'] ?? 0;
+        if (Quiz::findOrFail($id)->questions()->count() !== count($run['questions'])) {
+            session()->forget("quiz_run.$id");
+            return redirect()->route('quizzes.start', $id);
+        }
+        if (! isset($run['questions'][$index])) {
+            return redirect()->route('quizzes.result', $id);
+        }
+
+        return view('quizzes.take', [
+            'quiz_id' => $id,
+            'question' => (object) $run['questions'][$index],
+            'index' => $index,
+            'total' => count($run['questions']),
+        ]);
     }
 
     public function answer(Request $request, $id)
     {
         $state = session("quiz_run.$id");
-        if (empty($state)) { return redirect()->route('quizzes.start', $id); }
+        if (empty($state)) {
+            return redirect()->route('quizzes.start', $id);
+        }
+
         $run = $state['quiz'];
         $index = $state['index'] ?? 0;
         $question = $run['questions'][$index] ?? null;
         $choice = $request->validate(['choice' => 'required|integer']);
-        // store response
+        $validChoice = collect($question['answers'] ?? [])->contains('id', (int) $choice['choice']);
+        if (! $validChoice) {
+            return back()->withErrors(['choice' => 'Choose a valid answer.']);
+        }
+
         $responses = $state['responses'] ?? [];
-        $responses[] = (int)$choice['choice'];
+        $responses[] = (int) $choice['choice'];
         $index++;
         session(["quiz_run.$id" => ['quiz' => $run, 'index' => $index, 'responses' => $responses]]);
+
         if ($index >= count($run['questions'])) {
             session(["quiz_ready_to_finalize.$id" => true]);
-            $this->result($id);
             return redirect()->route('quizzes.result', $id);
         }
+
         return redirect()->route('quizzes.take', $id);
     }
 
     public function result($id)
     {
         $state = session("quiz_run.$id");
-        if (empty($state)) { return redirect()->route('quizzes.start', $id); }
+        if (empty($state)) {
+            return redirect()->route('quizzes.start', $id);
+        }
+
+        $quiz = Quiz::findOrFail($id);
         $run = $state['quiz'];
         $responses = $state['responses'] ?? [];
-        $json = json_decode(file_get_contents(resource_path('data/api.json')), true) ?? [];
-        $members = $json['members'] ?? [];
-        $groups = $json['groups'] ?? [];
-        $albums = $json['albums'] ?? [];
-        // find quiz metadata
-        $quizMeta = null;
-        foreach ($json['quizzes'] ?? [] as $q) { if ((string)($q['id'] ?? '') === (string)$id) { $quizMeta = $q; break; } }
-        $isKnowledgeQuiz = false;
-        $knowledgeMemberId = null;
-        if ($quizMeta && !empty($quizMeta['member_id'])) {
-            $knowledgeMemberId = (int)$quizMeta['member_id'];
-            if (stripos($quizMeta['name'] ?? '', 'how well do you know') !== false) {
-                $isKnowledgeQuiz = true;
-            }
-        }
-        $membersById = [];
-        $groupsById = [];
-        $albumsById = [];
-        foreach ($members as $m) { $membersById[$m['id']] = $m; }
-        foreach ($groups as $g) { $groupsById[$g['id']] = $g; }
-        foreach ($albums as $al) { $albumsById[$al['id']] = $al; }
+        $members = Member::orderBy('name')->get();
+        $groups = Group::orderBy('name')->get();
+        $albums = Album::orderBy('title')->get();
+        $memberById = $members->keyBy('id');
+        $groupById = $groups->keyBy('id');
+        $albumById = $albums->keyBy('id');
+        $answersById = collect($run['questions'])->flatMap(fn ($question) => $question['answers'])->keyBy('id');
 
-        $memberScores = [];
-        $groupScores = [];
-        $albumScores = [];
-
-        // determine preferred target type for this quiz by counting available answer types
-        $typeCounts = ['member' => 0, 'group' => 0, 'album' => 0];
-        foreach ($run['questions'] as $q) {
-            foreach ($q['answers'] as $a) {
-                $tt = $a['target_type'] ?? null;
-                if ($tt && isset($typeCounts[$tt])) { $typeCounts[$tt]++; }
-            }
-        }
-        $preferredType = null;
-        arsort($typeCounts);
-        $topType = array_key_first($typeCounts);
-        if ($typeCounts[$topType] > 0) { $preferredType = $topType; }
-
-        // build fast lookup of answers from run
-        $answersById = [];
-        foreach ($run['questions'] as $q) {
-            foreach ($q['answers'] as $a) { $answersById[$a['id']] = $a; }
-        }
-
-        if ($isKnowledgeQuiz) {
-            // compute correct count: a correct answer is one whose target_type is 'member' and target_id matches the quiz member
+        $knowledgeQuiz = $quiz->member_id && stripos($quiz->name, 'how well do you know') !== false;
+        if ($knowledgeQuiz) {
             $total = count($run['questions']);
-            $correct = 0;
-            foreach ($responses as $answerId) {
-                $a = $answersById[$answerId] ?? null;
-                if (!empty($a) && ($a['target_type'] ?? null) === 'member' && (int)($a['target_id'] ?? 0) === $knowledgeMemberId) {
-                    $correct++;
-                }
-                // wrong answers are ignored (treated as null target)
-            }
-            $percent = $total > 0 ? round(($correct / $total) * 100) : 0;
-            $resultType = 'percent';
-            $result = (object)[
-                'percent' => $percent,
+            $correct = collect($responses)->filter(function ($answerId) use ($answersById, $quiz) {
+                $answer = $answersById->get($answerId);
+                return ($answer['target_type'] ?? null) === 'member'
+                    && (int) ($answer['target_id'] ?? 0) === (int) $quiz->member_id;
+            })->count();
+            $result = (object) [
+                'percent' => $total ? round($correct / $total * 100) : 0,
                 'correct' => $correct,
                 'total' => $total,
-                'member_id' => $knowledgeMemberId,
-                'name' => $membersById[$knowledgeMemberId]['name'] ?? 'Knowledge result',
+                'member_id' => $quiz->member_id,
+                'name' => $memberById->get($quiz->member_id)?->name ?? 'Knowledge result',
             ];
-            $this->saveQuizHistory($id, $quizMeta, $resultType, $result, $total, $correct);
-            return view('quizzes.result', ['quiz_id' => $id, 'resultType' => $resultType, 'result' => $result, 'members' => $members]);
+            $this->saveQuizHistory($quiz, 'percent', $result, $total);
+            $this->updateStats($quiz, 'percent', $result);
+
+            return view('quizzes.result', [
+                'quiz_id' => $id,
+                'resultType' => 'percent',
+                'result' => $result,
+                'members' => $members->map->toArray()->all(),
+            ]);
         }
 
-        // tally responses into scores for non-knowledge quizzes
+        $scores = ['member' => [], 'group' => [], 'album' => []];
         foreach ($responses as $answerId) {
-            $a = $answersById[$answerId] ?? null;
-            if (empty($a)) { continue; }
-            $tt = $a['target_type'] ?? null;
-            $tid = $a['target_id'] ?? null;
-            if ($tt === 'member' && $tid) {
-                $memberScores[$tid] = ($memberScores[$tid] ?? 0) + 1;
-            } elseif ($tt === 'group' && $tid) {
-                $groupScores[$tid] = ($groupScores[$tid] ?? 0) + 1;
-                $groupMembers = array_values(array_filter($members, function($mm) use ($tid){ return (string)($mm['group_id'] ?? '') === (string)$tid; }));
-                $count = count($groupMembers) ?: 1;
-                foreach ($groupMembers as $gm) { $memberScores[$gm['id']] = ($memberScores[$gm['id']] ?? 0) + (1 / $count); }
-            } elseif ($tt === 'album' && $tid) {
-                $albumScores[$tid] = ($albumScores[$tid] ?? 0) + 1;
-                $album = $albumsById[$tid] ?? null;
-                $gid = $album['group_id'] ?? null;
-                if ($gid) {
-                    $groupScores[$gid] = ($groupScores[$gid] ?? 0) + 1;
-                    $groupMembers = array_values(array_filter($members, function($mm) use ($gid){ return (string)($mm['group_id'] ?? '') === (string)$gid; }));
-                    $count = count($groupMembers) ?: 1;
-                    foreach ($groupMembers as $gm) { $memberScores[$gm['id']] = ($memberScores[$gm['id']] ?? 0) + (1 / $count); }
-                }
+            $answer = $answersById->get($answerId);
+            $type = $answer['target_type'] ?? null;
+            $targetId = $answer['target_id'] ?? null;
+            if (! $targetId || ! isset($scores[$type])) {
+                continue;
             }
-        }
-        // determine top scores per type
-        $topMember = null; $topGroup = null; $topAlbum = null;
-        $topMemberScore = 0; $topGroupScore = 0; $topAlbumScore = 0;
-        if (!empty($memberScores)) { arsort($memberScores); $topMemberId = (int) array_key_first($memberScores); $topMemberScore = $memberScores[$topMemberId]; $topMember = $membersById[$topMemberId] ?? null; }
-        if (!empty($groupScores)) { arsort($groupScores); $topGroupId = (int) array_key_first($groupScores); $topGroupScore = $groupScores[$topGroupId]; $topGroup = $groupsById[$topGroupId] ?? null; }
-        if (!empty($albumScores)) { arsort($albumScores); $topAlbumId = (int) array_key_first($albumScores); $topAlbumScore = $albumScores[$topAlbumId]; $topAlbum = $albumsById[$topAlbumId] ?? null; }
-
-        // choose the result type: prefer the quiz's dominant answer type when possible
-        $resultType = 'member';
-        $result = $topMember ? (object)$topMember : null;
-        if (!empty($preferredType)) {
-            if ($preferredType === 'album' && $topAlbum) { $resultType = 'album'; $result = (object)$topAlbum; }
-            elseif ($preferredType === 'group' && $topGroup) { $resultType = 'group'; $result = (object)$topGroup; }
-            elseif ($preferredType === 'member' && $topMember) { $resultType = 'member'; $result = (object)$topMember; }
-        } else {
-            if ($topAlbumScore >= $topGroupScore && $topAlbumScore > $topMemberScore && $topAlbum) {
-                $resultType = 'album'; $result = (object)$topAlbum;
-            } elseif ($topGroupScore > $topMemberScore && $topGroupScore >= $topAlbumScore && $topGroup) {
-                $resultType = 'group'; $result = (object)$topGroup;
-            }
-        }
-
-        if (empty($result)) { 
-            return view('quizzes.result', ['quiz_id' => $id, 'resultType' => null, 'result' => null, 'members' => $members]); 
-        }
-
-        $resultScore = match ($resultType) {
-            'group' => $topGroupScore,
-            'album' => $topAlbumScore,
-            default => $topMemberScore,
-        };
-        $shouldUpdateStats = $this->saveQuizHistory($id, $quizMeta, $resultType, $result, count($run['questions']), $resultScore);
-
-        // --- Persist simple quiz stats into the static api.json ---
-        // structure: quiz_stats[quizId][type][id] => count
-        $quizStats = $json['quiz_stats'] ?? [];
-        $quizStats[$id] = $quizStats[$id] ?? [];
-
-        if ($shouldUpdateStats && $resultType === 'percent') {
-            // bucket percent into ranges
-            $p = (int)($result->percent ?? 0);
-            if ($p <= 30) { $bucket = '0-30'; }
-            elseif ($p <= 60) { $bucket = '31-60'; }
-            elseif ($p <= 90) { $bucket = '61-90'; }
-            else { $bucket = '91-100'; }
-            $quizStats[$id]['percent_buckets'] = $quizStats[$id]['percent_buckets'] ?? [];
-            $quizStats[$id]['percent_buckets'][$bucket] = ($quizStats[$id]['percent_buckets'][$bucket] ?? 0) + 1;
-        } elseif ($shouldUpdateStats) {
-            // increment count for the resulting entity
-            $tid = null;
-            if ($resultType === 'member') { $tid = $result->id ?? $result->member_id ?? null; }
-            elseif ($resultType === 'group') { $tid = $result->id ?? null; }
-            elseif ($resultType === 'album') { $tid = $result->id ?? null; }
-            if ($tid) {
-                $quizStats[$id][$resultType] = $quizStats[$id][$resultType] ?? [];
-                $key = (string)$tid;
-                $quizStats[$id][$resultType][$key] = ($quizStats[$id][$resultType][$key] ?? 0) + 1;
-            }
-        }
-
-        if ($shouldUpdateStats) {
-            $json['quiz_stats'] = $quizStats;
-            file_put_contents(resource_path('data/api.json'), json_encode($json, JSON_PRETTY_PRINT));
-        }
-
-        // build candidates list for display: all options present in run payload for the chosen/result types
-        $candidates = [];
-        if ($resultType === 'percent') {
-            // percent buckets will be displayed directly from quizStats
-            $candidates = [];
-        } else {
-            $seen = [];
-            foreach ($run['questions'] as $q) {
-                foreach ($q['answers'] as $a) {
-                    if (($a['target_type'] ?? null) === $resultType && ! empty($a['target_id'])) {
-                        $k = (string)$a['target_id'];
-                        if (isset($seen[$k])) { continue; }
-                        $seen[$k] = true;
-                        $ent = null;
-                        if ($resultType === 'member') { $ent = $membersById[$k] ?? null; }
-                        if ($resultType === 'group') { $ent = $groupsById[$k] ?? null; }
-                        if ($resultType === 'album') { $ent = $albumsById[$k] ?? null; }
-                        if ($ent) { $candidates[] = (object) array_merge(['id' => $k], $ent); }
-                    }
+            $scores[$type][$targetId] = ($scores[$type][$targetId] ?? 0) + 1;
+            if ($type === 'group') {
+                $this->spreadMemberScore($scores['member'], $members, $targetId);
+            } elseif ($type === 'album') {
+                $groupId = $albumById->get($targetId)?->group_id;
+                if ($groupId) {
+                    $scores['group'][$groupId] = ($scores['group'][$groupId] ?? 0) + 1;
+                    $this->spreadMemberScore($scores['member'], $members, $groupId);
                 }
             }
         }
 
-        return view('quizzes.result', ['quiz_id' => $id, 'resultType' => $resultType, 'result' => $result, 'members' => $members, 'quizStats' => $quizStats[$id] ?? [], 'candidates' => $candidates]);
+        foreach ($scores as &$scoreSet) {
+            arsort($scoreSet);
+        }
+        unset($scoreSet);
+
+        $typeCounts = collect($run['questions'])->flatMap(fn ($question) => $question['answers'])
+            ->pluck('target_type')->countBy()->sortDesc();
+        $preferredType = $typeCounts->keys()->first();
+        $resultType = $preferredType && ! empty($scores[$preferredType]) ? $preferredType : 'member';
+        $resultId = array_key_first($scores[$resultType]);
+        $lookup = ['member' => $memberById, 'group' => $groupById, 'album' => $albumById];
+        $result = $resultId !== null ? $lookup[$resultType]->get($resultId) : null;
+
+        if (! $result) {
+            return view('quizzes.result', ['quiz_id' => $id, 'resultType' => null, 'result' => null, 'members' => $members->map->toArray()->all()]);
+        }
+
+        $this->saveQuizHistory($quiz, $resultType, $result, count($run['questions']));
+        $quizStats = $this->updateStats($quiz, $resultType, $result);
+        $candidates = $this->candidates($run, $resultType, $lookup);
+
+        return view('quizzes.result', [
+            'quiz_id' => $id,
+            'resultType' => $resultType,
+            'result' => $result,
+            'members' => $members->map->toArray()->all(),
+            'quizStats' => $quizStats,
+            'candidates' => $candidates,
+        ]);
     }
 
-    private function saveQuizHistory($id, ?array $quizMeta, string $resultType, object $result, int $total, $score): bool
+    private function spreadMemberScore(array &$scores, $members, $groupId): void
     {
-        $sessionKey = "quiz_result_saved.$id";
-        if (session()->has($sessionKey) || ! session()->pull("quiz_ready_to_finalize.$id") || ! auth()->check()) {
-            return false;
+        $groupMembers = $members->where('group_id', $groupId);
+        $share = 1 / max($groupMembers->count(), 1);
+        foreach ($groupMembers as $member) {
+            $scores[$member->id] = ($scores[$member->id] ?? 0) + $share;
+        }
+    }
+
+    private function saveQuizHistory(Quiz $quiz, string $resultType, object $result, int $total): void
+    {
+        $sessionKey = "quiz_result_saved.{$quiz->id}";
+        if (session()->has($sessionKey) || ! session()->pull("quiz_ready_to_finalize.{$quiz->id}") || ! auth()->check()) {
+            return;
         }
 
-        $isKnowledgeQuiz = $resultType === 'percent';
-
+        $knowledge = $resultType === 'percent';
         QuizResult::create([
             'user_id' => auth()->id(),
-            'quiz_id' => (int) $id,
-            'quiz_name' => $quizMeta['name'] ?? 'Quiz',
-            'result_type' => $isKnowledgeQuiz ? 'knowledge' : 'personality',
-            'correct_answers' => $isKnowledgeQuiz ? (int) ($result->correct ?? 0) : null,
-            'total_questions' => $isKnowledgeQuiz ? $total : null,
-            'result_name' => $isKnowledgeQuiz ? null : ($result->name ?? $result->title ?? 'Quiz result'),
-            'total_points' => $isKnowledgeQuiz ? (int) ($result->percent ?? 0) : 0,
+            'quiz_id' => $quiz->id,
+            'quiz_name' => $quiz->name,
+            'result_type' => $knowledge ? 'knowledge' : 'personality',
+            'correct_answers' => $knowledge ? (int) ($result->correct ?? 0) : null,
+            'total_questions' => $knowledge ? $total : null,
+            'result_name' => $knowledge ? null : ($result->name ?? $result->title ?? 'Quiz result'),
+            'total_points' => $knowledge ? (int) ($result->percent ?? 0) : 0,
             'details' => null,
         ]);
-
         session([$sessionKey => true]);
+    }
 
-        return true;
+    private function updateStats(Quiz $quiz, string $resultType, object $result): array
+    {
+        $stats = $quiz->settings['quiz_stats'] ?? [];
+        if (! session()->has("quiz_result_saved.{$quiz->id}")) {
+            return $stats;
+        }
+
+        if ($resultType === 'percent') {
+            $percent = (int) ($result->percent ?? 0);
+            $bucket = $percent <= 30 ? '0-30' : ($percent <= 60 ? '31-60' : ($percent <= 90 ? '61-90' : '91-100'));
+            $stats['percent_buckets'][$bucket] = ($stats['percent_buckets'][$bucket] ?? 0) + 1;
+        } else {
+            $key = (string) ($result->id ?? '');
+            if ($key !== '') {
+                $stats[$resultType][$key] = ($stats[$resultType][$key] ?? 0) + 1;
+            }
+        }
+
+        $settings = $quiz->settings ?? [];
+        $settings['quiz_stats'] = $stats;
+        $quiz->update(['settings' => $settings]);
+        return $stats;
+    }
+
+    private function candidates(array $run, string $type, array $lookup): array
+    {
+        $seen = [];
+        $result = [];
+        foreach ($run['questions'] as $question) {
+            foreach ($question['answers'] as $answer) {
+                if (($answer['target_type'] ?? null) !== $type || empty($answer['target_id'])) {
+                    continue;
+                }
+                $key = (string) $answer['target_id'];
+                if (isset($seen[$key])) {
+                    continue;
+                }
+                $seen[$key] = true;
+                if ($entity = $lookup[$type]->get($answer['target_id'])) {
+                    $result[] = $entity;
+                }
+            }
+        }
+        return $result;
     }
 }

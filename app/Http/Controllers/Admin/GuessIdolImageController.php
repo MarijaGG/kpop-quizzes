@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\GuessIdolImage;
+use App\Models\Group;
+use App\Models\Member;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -11,9 +13,8 @@ class GuessIdolImageController extends BaseAdminController
 {
     public function index(Request $request)
     {
-        $data = $this->data();
-        $groups = $data['groups'] ?? [];
-        $members = $data['members'] ?? [];
+        $groups = Group::orderBy('name')->get()->map->toArray()->all();
+        $members = Member::orderBy('name')->get()->map->toArray()->all();
         $groupId = $request->query('group_id');
         $difficulty = $request->query('difficulty');
 
@@ -44,10 +45,9 @@ class GuessIdolImageController extends BaseAdminController
 
     public function create()
     {
-        $data = $this->data();
         return view('admin.guess-idol-images.create', [
-            'groups' => $data['groups'] ?? [],
-            'members' => $data['members'] ?? [],
+            'groups' => Group::orderBy('name')->get()->map->toArray()->all(),
+            'members' => Member::orderBy('name')->get()->map->toArray()->all(),
         ]);
     }
 
@@ -63,11 +63,10 @@ class GuessIdolImageController extends BaseAdminController
 
     public function edit(GuessIdolImage $guessIdolImage)
     {
-        $data = $this->data();
         return view('admin.guess-idol-images.edit', [
             'image' => $guessIdolImage,
-            'groups' => $data['groups'] ?? [],
-            'members' => $data['members'] ?? [],
+            'groups' => Group::orderBy('name')->get()->map->toArray()->all(),
+            'members' => Member::orderBy('name')->get()->map->toArray()->all(),
         ]);
     }
 
@@ -95,28 +94,20 @@ class GuessIdolImageController extends BaseAdminController
 
     private function validateImage(Request $request, bool $required = true): array
     {
-        $data = $this->data();
-        $groupIds = array_column($data['groups'] ?? [], 'id');
-        $memberIds = array_column($data['members'] ?? [], 'id');
         $rules = [
-            'group_id' => ['required', 'integer', 'in:'.implode(',', $groupIds)],
-            'member_id' => ['required', 'integer', 'in:'.implode(',', $memberIds)],
+            'group_id' => ['required', 'integer', 'exists:groups,id'],
+            'member_id' => ['required', 'integer', 'exists:members,id'],
             'difficulty' => ['required', 'in:easy,medium,hard'],
             'image' => [$required ? 'required' : 'nullable', 'image', 'max:5120'],
         ];
         $validated = $request->validate($rules);
 
-        $member = collect($data['members'] ?? [])->firstWhere('id', (int) $validated['member_id']);
-        if (! $member || (string) ($member['group_id'] ?? '') !== (string) $validated['group_id']) {
+        $member = Member::find($validated['member_id']);
+        if (! $member || (int) $member->group_id !== (int) $validated['group_id']) {
             abort(422, 'The selected member must belong to the selected group.');
         }
 
         return $validated;
-    }
-
-    private function data(): array
-    {
-        return json_decode(file_get_contents(resource_path('data/api.json')), true) ?? [];
     }
 
     private function nameFor(array $items, $id): string

@@ -1,166 +1,17 @@
 <?php
-
 namespace App\Http\Controllers\Admin;
-
-use App\Http\Controllers\Admin\BaseAdminController;
+use App\Models\Group;
+use App\Models\Member;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Pagination\LengthAwarePaginator;
-
 class MemberController extends BaseAdminController
 {
-    public function index()
-    {
-        $json = json_decode(file_get_contents(resource_path('data/api.json')), true) ?? [];
-        $all = $json['members'] ?? [];
-
-        // optional group filter from query string
-        $groupId = request('group_id');
-        if (! empty($groupId)) {
-            $all = array_values(array_filter($all, function($m) use ($groupId) {
-                return (string)($m['group_id'] ?? '') === (string)$groupId;
-            }));
-        }
-
-        $page = (int) request('page', 1);
-        $perPage = 20;
-        $total = count($all);
-        $items = array_slice($all, ($page - 1) * $perPage, $perPage);
-        $items = array_map(function($i){ return (object)$i; }, $items);
-        $members = new LengthAwarePaginator($items, $total, $perPage, $page, ['path' => url()->current(), 'query' => request()->query()]);
-        return view('admin.members.index', compact('members'));
-    }
-
-    public function create()
-    {
-        $json = json_decode(file_get_contents(resource_path('data/api.json')), true) ?? [];
-        $groups = $json['groups'] ?? [];
-        $groups = array_map(function($i){ return (object)$i; }, $groups);
-        return view('admin.members.create', compact('groups'));
-    }
-
-    public function store(Request $request)
-    {
-        $data = $request->validate([
-            'group_id' => 'required',
-            'name' => 'required|string|max:255',
-            'about' => 'nullable|string',
-            'description' => 'nullable|string',
-            'image' => 'nullable|image|max:2048',
-            'traits' => 'array',
-            'traits.*' => 'nullable|string|max:255',
-        ]);
-
-        // Ensure traits array is limited to 5
-        $data['traits'] = array_values(array_filter($data['traits'] ?? []));
-        $data['traits'] = array_slice($data['traits'], 0, 5);
-
-        if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('images/members', 'public');
-            $this->publishImage($data['image']);
-        }
-
-        $json = json_decode(file_get_contents(resource_path('data/api.json')), true) ?? [];
-        $items = $json['members'] ?? [];
-        $ids = array_column($items, 'id');
-        $max = count($ids) ? max($ids) : 0;
-        $data['id'] = $data['id'] ?? ($max + 1);
-        $items[] = $data;
-        $json['members'] = $items;
-        file_put_contents(resource_path('data/api.json'), json_encode($json, JSON_PRETTY_PRINT));
-
-        return redirect()->route('admin.members.index')->with('success', 'Member created');
-    }
-
-    public function edit($id)
-    {
-        if (is_object($id) && isset($id->id)) {
-            $id = $id->id;
-        }
-        $json = json_decode(file_get_contents(resource_path('data/api.json')), true) ?? [];
-        $groups = $json['groups'] ?? [];
-        $groups = array_map(function($i){ return (object)$i; }, $groups);
-        $member = null;
-        foreach ($json['members'] ?? [] as $item) {
-            if ((string)($item['id'] ?? '') === (string)$id) { $member = $item; break; }
-        }
-        return view('admin.members.edit', ['member' => (object)($member ?? []), 'groups' => $groups]);
-    }
-
-    public function update(Request $request, $id)
-    {
-        if (is_object($id) && isset($id->id)) {
-            $id = $id->id;
-        }
-        $data = $request->validate([
-            'group_id' => 'required',
-            'name' => 'required|string|max:255',
-            'about' => 'nullable|string',
-            'description' => 'nullable|string',
-            'image' => 'nullable|image|max:2048',
-            'traits' => 'array',
-            'traits.*' => 'nullable|string|max:255',
-        ]);
-
-        $data['traits'] = array_values(array_filter($data['traits'] ?? []));
-        $data['traits'] = array_slice($data['traits'], 0, 5);
-
-        $json = json_decode(file_get_contents(resource_path('data/api.json')), true) ?? [];
-        $existing = [];
-        foreach ($json['members'] ?? [] as $item) {
-            if ((string)($item['id'] ?? '') === (string)$id) { $existing = $item; break; }
-        }
-
-        if ($request->hasFile('image')) {
-            if (! empty($existing['image'])) {
-                Storage::disk('public')->delete($existing['image']);
-            }
-            $data['image'] = $request->file('image')->store('images/members', 'public');
-            $this->publishImage($data['image']);
-        }
-
-        $updated = [];
-        foreach ($json['members'] ?? [] as $item) {
-            if ((string)($item['id'] ?? '') === (string)$id) {
-                $item = array_merge($item, $data);
-            }
-            $updated[] = $item;
-        }
-        $json['members'] = $updated;
-        file_put_contents(resource_path('data/api.json'), json_encode($json, JSON_PRETTY_PRINT));
-
-        return redirect()->route('admin.members.index')->with('success', 'Member updated');
-    }
-
-    public function destroy($id)
-    {
-        if (is_object($id) && isset($id->id)) {
-            $id = $id->id;
-        }
-        $json = json_decode(file_get_contents(resource_path('data/api.json')), true) ?? [];
-        $existing = [];
-        $new = [];
-        foreach ($json['members'] ?? [] as $item) {
-            if ((string)($item['id'] ?? '') === (string)$id) { $existing = $item; continue; }
-            $new[] = $item;
-        }
-        if (! empty($existing['image'])) {
-            Storage::disk('public')->delete($existing['image']);
-        }
-        $json['members'] = $new;
-        file_put_contents(resource_path('data/api.json'), json_encode($json, JSON_PRETTY_PRINT));
-        return redirect()->route('admin.members.index')->with('success', 'Member deleted');
-    }
-
-    private function publishImage(string $path): void
-    {
-        $source = storage_path('app/public/'.$path);
-        $destination = public_path('storage/'.$path);
-        if (! is_dir(dirname($destination))) {
-            mkdir(dirname($destination), 0755, true);
-        }
-        copy($source, $destination);
-    }
-
+ public function index(Request $request){$query=Member::with('group')->latest();if($request->filled('group_id'))$query->where('group_id',$request->group_id);return view('admin.members.index',['members'=>$query->paginate(20)->withQueryString()]);}
+ public function create(){return view('admin.members.create',['groups'=>Group::orderBy('name')->get()]);}
+ public function store(Request $request){$data=$this->validated($request);$data['traits']=array_slice(array_values(array_filter($data['traits']??[])),0,5);$data=$this->image($request,$data);Member::create($data);return redirect()->route('admin.members.index')->with('success','Member created');}
+ public function edit($id){return view('admin.members.edit',['member'=>Member::findOrFail($id),'groups'=>Group::orderBy('name')->get()]);}
+ public function update(Request $request,$id){$member=Member::findOrFail($id);$data=$this->validated($request);$data['traits']=array_slice(array_values(array_filter($data['traits']??[])),0,5);if($request->hasFile('image')){Storage::disk('public')->delete($member->image);$data=$this->image($request,$data);}$member->update($data);return redirect()->route('admin.members.index')->with('success','Member updated');}
+ public function destroy($id){$member=Member::findOrFail($id);Storage::disk('public')->delete($member->image);$member->delete();return redirect()->route('admin.members.index')->with('success','Member deleted');}
+ private function validated(Request $request):array{return $request->validate(['group_id'=>'required|exists:groups,id','name'=>'required|string|max:255','about'=>'nullable|string','description'=>'nullable|string','image'=>'nullable|image|max:2048','traits'=>'array','traits.*'=>'nullable|string|max:255']);}
+ private function image(Request $request,array $data):array{if($request->hasFile('image'))$data['image']=$request->file('image')->store('images/members','public');return $data;}
 }

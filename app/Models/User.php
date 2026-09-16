@@ -73,15 +73,7 @@ class User extends Authenticatable
             return null;
         }
 
-        $data = json_decode(file_get_contents(resource_path('data/api.json')), true) ?? [];
-
-        foreach ($data['members'] ?? [] as $member) {
-            if ((int) ($member['id'] ?? 0) === (int) $this->avatar_member_id) {
-                return $member;
-            }
-        }
-
-        return null;
+        return Member::find($this->avatar_member_id)?->toArray();
     }
 
     public function isAdmin(): bool

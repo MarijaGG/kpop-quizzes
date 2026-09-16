@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\GuessIdolImage;
+use App\Models\Group;
+use App\Models\Member;
 use App\Models\QuizResult;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -14,12 +16,11 @@ class GuessIdolTest extends TestCase
 
     public function test_guess_idol_round_uses_distinct_images_and_saves_once(): void
     {
-        $data = json_decode(file_get_contents(resource_path('data/api.json')), true) ?? [];
-        $groupId = 2;
-        $memberIds = collect($data['members'] ?? [])
-            ->filter(fn ($member) => (string) ($member['group_id'] ?? '') === (string) $groupId)
-            ->pluck('id')
-            ->values();
+        $groupId = Group::create(['name' => 'Test Group'])->id;
+        $memberIds = collect(range(1, 4))->map(fn ($number) => Member::create([
+            'group_id' => $groupId,
+            'name' => 'Test Member '.$number,
+        ])->id);
         $user = User::factory()->create();
 
         for ($index = 0; $index < 5; $index++) {

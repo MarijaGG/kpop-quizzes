@@ -4,6 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Http\Requests\FavoriteUpdateRequest;
+use App\Models\Album;
+use App\Models\Group;
+use App\Models\Member;
+use App\Models\Quiz;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,11 +19,10 @@ class ProfileController extends Controller
 {
     public function show(Request $request): View
     {
-        $data = json_decode(file_get_contents(resource_path('data/api.json')), true) ?? [];
-        $quizNames = [];
-        foreach ($data['quizzes'] ?? [] as $quiz) {
-            $quizNames[(string)($quiz['id'] ?? '')] = $quiz['name'] ?? 'Quiz';
-        }
+        $groups = Group::orderBy('name')->get()->map->toArray()->all();
+        $members = Member::orderBy('name')->get()->map->toArray()->all();
+        $albums = Album::orderBy('title')->get()->map->toArray()->all();
+        $quizNames = Quiz::pluck('name', 'id')->mapWithKeys(fn ($name, $id) => [(string) $id => $name])->all();
         $favorites = $request->user()->favorites()->get()->groupBy('item_type');
 
         return view('profile.show', [
@@ -27,13 +30,13 @@ class ProfileController extends Controller
             'avatarMember' => $request->user()->avatarMember(),
             'results' => $request->user()->quizResults()->latest()->paginate(5),
             'quizNames' => $quizNames,
-            'groups' => $data['groups'] ?? [],
-            'members' => $data['members'] ?? [],
-            'albums' => $data['albums'] ?? [],
+            'groups' => $groups,
+            'members' => $members,
+            'albums' => $albums,
             'favorites' => [
-                'group' => $this->resolveFavorites($favorites->get('group', collect()), $data['groups'] ?? []),
-                'member' => $this->resolveFavorites($favorites->get('member', collect()), $data['members'] ?? []),
-                'album' => $this->resolveFavorites($favorites->get('album', collect()), $data['albums'] ?? []),
+                'group' => $this->resolveFavorites($favorites->get('group', collect()), $groups),
+                'member' => $this->resolveFavorites($favorites->get('member', collect()), $members),
+                'album' => $this->resolveFavorites($favorites->get('album', collect()), $albums),
             ],
         ]);
     }
@@ -68,12 +71,10 @@ class ProfileController extends Controller
 
     public function edit(Request $request): View
     {
-        $data = json_decode(file_get_contents(resource_path('data/api.json')), true) ?? [];
-
         return view('profile.edit', [
             'user' => $request->user(),
-            'members' => $data['members'] ?? [],
-            'groups' => $data['groups'] ?? [],
+            'members' => Member::orderBy('name')->get()->map->toArray()->all(),
+            'groups' => Group::orderBy('name')->get()->map->toArray()->all(),
             'avatarMember' => $request->user()->avatarMember(),
         ]);
     }

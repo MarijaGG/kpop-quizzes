@@ -24,15 +24,7 @@
 
                 <div class="card-body">
                     @php
-                        $recent = $recentQuizzes ?? \App\Models\Quiz::orderBy('created_at','desc')->take(5)->get();
-
-                            if(($recent ?? null) === null || count($recent) === 0) {
-                                $json = json_decode(file_get_contents(resource_path('data/api.json')), true) ?? [];
-                                $q = $json['quizzes'] ?? [];
-                                // take latest by id if created_at missing
-                                usort($q, function($a,$b){ return ($b['id'] ?? 0) <=> ($a['id'] ?? 0); });
-                                $recent = array_slice($q, 0, 5);
-                            }
+                        $recent = $recentQuizzes ?? \App\Models\Quiz::latest()->take(5)->get();
                     @endphp
 
                     <div class="recent-gallery">
