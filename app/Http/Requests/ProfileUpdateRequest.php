@@ -34,6 +34,11 @@ class ProfileUpdateRequest extends FormRequest
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
             'avatar_member_id' => ['nullable', 'integer', Rule::exists('members', 'id')],
+            'selected_title' => [
+                'nullable',
+                'string',
+                Rule::in(array_keys($this->user()->unlockedTitles())),
+            ],
         ];
     }
 }

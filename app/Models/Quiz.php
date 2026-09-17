@@ -21,6 +21,16 @@ class Quiz extends Model
         'settings' => 'array',
     ];
 
+    public function group()
+    {
+        return $this->belongsTo(Group::class);
+    }
+
+    public function member()
+    {
+        return $this->belongsTo(Member::class);
+    }
+
     public function questions()
     {
         return $this->hasMany(Question::class);

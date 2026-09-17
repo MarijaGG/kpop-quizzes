@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class ProfileController extends Controller
@@ -28,6 +29,7 @@ class ProfileController extends Controller
         return view('profile.show', [
             'user' => $request->user(),
             'avatarMember' => $request->user()->avatarMember(),
+            'selectedTitle' => $request->user()->selectedTitleLabel(),
             'results' => $request->user()->quizResults()->latest()->paginate(5),
             'quizNames' => $quizNames,
             'groups' => $groups,
@@ -76,6 +78,7 @@ class ProfileController extends Controller
             'members' => Member::orderBy('name')->get()->map->toArray()->all(),
             'groups' => Group::orderBy('name')->get()->map->toArray()->all(),
             'avatarMember' => $request->user()->avatarMember(),
+            'unlockedTitles' => $request->user()->unlockedTitles(),
         ]);
     }
 
@@ -98,6 +101,17 @@ class ProfileController extends Controller
         $request->user()->save();
 
         return Redirect::route('profile')->with('status', 'profile-updated');
+    }
+
+    public function equipTitle(Request $request): RedirectResponse
+    {
+        $titleKey = $request->validate([
+            'title' => ['required', 'string', Rule::in(array_keys($request->user()->unlockedTitles()))],
+        ])['title'];
+
+        $request->user()->update(['selected_title' => $titleKey]);
+
+        return Redirect::route('profile')->with('status', 'title-equipped');
     }
 
     /**

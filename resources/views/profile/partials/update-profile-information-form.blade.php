@@ -93,6 +93,22 @@
             <x-input-error class="mt-2" :messages="$errors->get('avatar_member_id')" />
         </div>
 
+        <div>
+            <x-input-label for="selected_title" :value="__('Title')" />
+            <select id="selected_title" name="selected_title" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                <option value="">No title</option>
+                @foreach($unlockedTitles as $key => $title)
+                    <option value="{{ $key }}" @selected(old('selected_title', $user->selected_title) === $key)>
+                        {{ $title['label'] }}
+                    </option>
+                @endforeach
+            </select>
+            @if(empty($unlockedTitles))
+                <p class="mt-1 text-sm text-gray-600">Get 100% on the Ni-ki or Hyunjin quiz to unlock a title.</p>
+            @endif
+            <x-input-error class="mt-2" :messages="$errors->get('selected_title')" />
+        </div>
+
         <div class="flex items-center gap-4">
             <x-primary-button>{{ __('Save changes') }}</x-primary-button>
 

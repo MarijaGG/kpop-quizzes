@@ -26,6 +26,17 @@
                 <h2 class="text-large">You know {{ $percent }}% about {{ $memberObj->name ?? 'them' }}</h2>
                 <p class="muted" style="margin-top:0.5rem;">{{ $msg }}</p>
             </div>
+            @if(!empty($newTitle))
+                <div class="card text-center" style="margin-top:1rem;">
+                    <h3 class="text-xl">New title unlocked: {{ $newTitle['label'] }}</h3>
+                    <form method="post" action="{{ route('profile.title.equip') }}" style="margin-top:1rem;">
+                        @csrf
+                        @method('patch')
+                        <input type="hidden" name="title" value="{{ $newTitle['key'] }}">
+                        <button type="submit" class="btn btn-primary">Equip title</button>
+                    </form>
+                </div>
+            @endif
             @if(!empty($quizStats) && !empty($quizStats['percent_buckets']))
                 <div class="card" style="margin-top:1rem;padding:1rem;">
                     <h4>How others scored</h4>

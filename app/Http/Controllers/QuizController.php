@@ -7,6 +7,7 @@ use App\Models\Group;
 use App\Models\Member;
 use App\Models\Quiz;
 use App\Models\QuizResult;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class QuizController extends Controller
@@ -164,12 +165,14 @@ class QuizController extends Controller
             ];
             $this->saveQuizHistory($quiz, 'percent', $result, $total);
             $this->updateStats($quiz, 'percent', $result);
+            $newTitleAward = auth()->user()?->awardTitleForPerfectQuiz($quiz, $correct, $total);
 
             return view('quizzes.result', [
                 'quiz_id' => $id,
                 'resultType' => 'percent',
                 'result' => $result,
                 'members' => $members->map->toArray()->all(),
+                'newTitle' => $newTitleAward ? User::TITLES[$newTitleAward->title_key] + ['key' => $newTitleAward->title_key] : null,
             ]);
         }
 
