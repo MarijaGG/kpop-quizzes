@@ -46,7 +46,7 @@ $maxWidth = [
     x-on:keydown.tab.prevent="$event.shiftKey || nextFocusable().focus()"
     x-on:keydown.shift.tab.prevent="prevFocusable().focus()"
     x-show="show"
-    class="modal-overlay"
+    {{ $attributes->except('focusable')->merge(['class' => 'modal-overlay']) }}
     style="display: {{ $show ? 'block' : 'none' }};"
 >
     <div

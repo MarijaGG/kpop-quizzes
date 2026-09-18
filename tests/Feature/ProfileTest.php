@@ -144,6 +144,22 @@ class ProfileTest extends TestCase
         $this->assertSame('hyunjin-number-one-fan', $user->refresh()->selected_title);
     }
 
+    public function test_title_equip_action_returns_json_for_the_quiz_result_modal(): void
+    {
+        $user = User::factory()->create();
+        $user->titleAwards()->create([
+            'title_key' => 'album-21-enjoyer',
+            'title_label' => 'HOP Enjoyer',
+            'awarded_at' => now(),
+        ]);
+
+        $response = $this->actingAs($user)
+            ->patchJson('/profile/title', ['title' => 'album-21-enjoyer']);
+
+        $response->assertOk()->assertJson(['selected_title' => 'album-21-enjoyer']);
+        $this->assertSame('album-21-enjoyer', $user->refresh()->selected_title);
+    }
+
     public function test_user_can_delete_their_account(): void
     {
         $user = User::factory()->create();

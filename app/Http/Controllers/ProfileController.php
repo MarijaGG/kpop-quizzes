@@ -10,6 +10,7 @@ use App\Models\Member;
 use App\Models\Quiz;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
@@ -103,13 +104,17 @@ class ProfileController extends Controller
         return Redirect::route('profile')->with('status', 'profile-updated');
     }
 
-    public function equipTitle(Request $request): RedirectResponse
+    public function equipTitle(Request $request): RedirectResponse|JsonResponse
     {
         $titleKey = $request->validate([
             'title' => ['required', 'string', Rule::in(array_keys($request->user()->unlockedTitles()))],
         ])['title'];
 
         $request->user()->update(['selected_title' => $titleKey]);
+
+        if ($request->expectsJson()) {
+            return response()->json(['selected_title' => $titleKey]);
+        }
 
         return Redirect::route('profile')->with('status', 'title-equipped');
     }
