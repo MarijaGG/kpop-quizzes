@@ -104,7 +104,11 @@ class User extends Authenticatable
 
     public function unlockedTitles(): array
     {
-        $awardedTitleKeys = $this->titleAwards()->pluck('title_key')->all();
+        $awardedTitles = $this->titleAwards()->get()->mapWithKeys(function (UserTitle $award) {
+            $label = $award->title_label ?? self::TITLES[$award->title_key]['label'] ?? null;
+
+            return $label ? [$award->title_key => ['label' => $label]] : [];
+        })->all();
         $completedQuizNames = $this->quizResults()
             ->where('result_type', 'knowledge')
             ->where('total_questions', '>', 0)
@@ -112,31 +116,36 @@ class User extends Authenticatable
             ->pluck('quiz_name')
             ->all();
 
-        return array_filter(self::TITLES, fn (array $title, string $key) => in_array($key, $awardedTitleKeys, true)
-            || in_array($title['quiz_name'], $completedQuizNames, true), ARRAY_FILTER_USE_BOTH);
+        $legacyTitles = array_filter(self::TITLES, fn (array $title) => in_array($title['quiz_name'], $completedQuizNames, true));
+
+        return $awardedTitles + $legacyTitles;
     }
 
-    public function awardTitleForPerfectQuiz(Quiz $quiz, int $correctAnswers, int $totalQuestions): ?UserTitle
+    public function awardTitleForQuizResult(Quiz $quiz, string $resultType, object $result, ?int $correctAnswers = null, ?int $totalQuestions = null): ?UserTitle
     {
-        if ($totalQuestions === 0 || $correctAnswers !== $totalQuestions) {
-            return null;
-        }
-
-        $titleKey = null;
-        foreach (self::TITLES as $key => $title) {
-            if ($title['quiz_name'] === $quiz->name) {
-                $titleKey = $key;
-                break;
+        if ($resultType === 'percent') {
+            if (! $totalQuestions || $correctAnswers !== $totalQuestions) {
+                return null;
             }
-        }
 
-        if ($titleKey === null) {
+            $titleKey = 'member-' . $result->member_id . '-number-one-fan';
+            $titleLabel = "{$result->name}'s #1 Fan";
+        } elseif ($resultType === 'member') {
+            $titleKey = 'member-' . $result->id . '-twin';
+            $titleLabel = "{$result->name}'s Twin";
+        } elseif ($resultType === 'album') {
+            $titleKey = 'album-' . $result->id . '-enjoyer';
+            $titleLabel = "{$result->title} Enjoyer";
+        } elseif ($resultType === 'group') {
+            $titleKey = 'group-' . $result->id . '-loyalist';
+            $titleLabel = "{$result->name} Loyalist";
+        } else {
             return null;
         }
 
         $award = $this->titleAwards()->firstOrCreate(
             ['title_key' => $titleKey],
-            ['awarded_at' => now()],
+            ['title_label' => $titleLabel, 'awarded_at' => now()],
         );
 
         return $award->wasRecentlyCreated ? $award : null;
@@ -144,6 +153,13 @@ class User extends Authenticatable
 
     public function selectedTitleLabel(): ?string
     {
-        return self::TITLES[$this->selected_title]['label'] ?? null;
+        return $this->titleAwards()->where('title_key', $this->selected_title)->value('title_label')
+            ?? self::TITLES[$this->selected_title]['label']
+            ?? null;
+    }
+
+    public function selectedTitleHue(): int
+    {
+        return (int) (crc32((string) $this->selected_title) % 360);
     }
 }

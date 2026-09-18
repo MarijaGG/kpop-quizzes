@@ -165,14 +165,14 @@ class QuizController extends Controller
             ];
             $this->saveQuizHistory($quiz, 'percent', $result, $total);
             $this->updateStats($quiz, 'percent', $result);
-            $newTitleAward = auth()->user()?->awardTitleForPerfectQuiz($quiz, $correct, $total);
+            $newTitleAward = auth()->user()?->awardTitleForQuizResult($quiz, 'percent', $result, $correct, $total);
 
             return view('quizzes.result', [
                 'quiz_id' => $id,
                 'resultType' => 'percent',
                 'result' => $result,
                 'members' => $members->map->toArray()->all(),
-                'newTitle' => $newTitleAward ? User::TITLES[$newTitleAward->title_key] + ['key' => $newTitleAward->title_key] : null,
+                'newTitle' => $this->newTitleData($newTitleAward),
             ]);
         }
 
@@ -216,6 +216,7 @@ class QuizController extends Controller
         $this->saveQuizHistory($quiz, $resultType, $result, count($run['questions']));
         $quizStats = $this->updateStats($quiz, $resultType, $result);
         $candidates = $this->candidates($run, $resultType, $lookup);
+        $newTitleAward = auth()->user()?->awardTitleForQuizResult($quiz, $resultType, $result);
 
         return view('quizzes.result', [
             'quiz_id' => $id,
@@ -224,7 +225,13 @@ class QuizController extends Controller
             'members' => $members->map->toArray()->all(),
             'quizStats' => $quizStats,
             'candidates' => $candidates,
+            'newTitle' => $this->newTitleData($newTitleAward),
         ]);
+    }
+
+    private function newTitleData(?\App\Models\UserTitle $award): ?array
+    {
+        return $award ? ['key' => $award->title_key, 'label' => $award->title_label] : null;
     }
 
     private function spreadMemberScore(array &$scores, $members, $groupId): void

@@ -13,6 +13,7 @@ class UserTitle extends Model
     protected $fillable = [
         'user_id',
         'title_key',
+        'title_label',
         'awarded_at',
     ];
 

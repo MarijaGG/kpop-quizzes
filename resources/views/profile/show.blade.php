@@ -19,7 +19,7 @@
                             <div class="profile-name-row">
                                 <h1>{{ $user->name }}</h1>
                                 @if($selectedTitle)
-                                    <span class="profile-title profile-title--{{ $user->selected_title }}">{{ $selectedTitle }}</span>
+                                    <span class="profile-title" style="--title-hue: {{ $user->selectedTitleHue() }};">{{ $selectedTitle }}</span>
                                 @endif
                             </div>
                             <p class="profile-bio">{{ $user->bio ?: 'No bio yet.' }}</p>

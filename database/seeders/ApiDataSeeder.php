@@ -133,8 +133,13 @@ class ApiDataSeeder extends Seeder
 
     private function seedAnswers(array $answers): void
     {
+        // The legacy source identifies quiz 1 answers as questions 1-10, while its database questions are 21-30.
+        $questionIdMap = array_combine(range(1, 10), range(21, 30));
+
         foreach ($answers as $answer) {
-            if (! Question::whereKey($answer['question_id'])->exists()) {
+            $questionId = $questionIdMap[$answer['question_id']] ?? $answer['question_id'];
+
+            if (! Question::whereKey($questionId)->exists()) {
                 $this->command?->warn("Skipping answer {$answer['id']}: question {$answer['question_id']} does not exist.");
                 continue;
             }
@@ -150,7 +155,7 @@ class ApiDataSeeder extends Seeder
             Answer::updateOrCreate(
                 ['id' => $answer['id']],
                 [
-                    'question_id' => $answer['question_id'],
+                    'question_id' => $questionId,
                     'text' => $answer['text'],
                     'points' => $answer['points'] ?? 0,
                     'meta' => $meta ?: null,

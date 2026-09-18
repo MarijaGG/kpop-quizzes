@@ -166,9 +166,7 @@
 .profile-summary-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
 .profile-name-row { display: flex; align-items: center; flex-wrap: wrap; gap: .6rem; }
 .profile-summary-heading h1 { color: var(--brand-1); font-size: 1.75rem; font-weight: 700; }
-.profile-title { display: inline-block; padding: .5rem .85rem; border: 2px solid currentColor; border-radius: 999px; font-size: .75rem; font-weight: 800; letter-spacing: .08em; line-height: 1; text-transform: uppercase; }
-.profile-title--niki-number-one-fan { background: linear-gradient(135deg, #fce7f3, #f9a8d4); color: #9d174d; box-shadow: 0 2px 0 #9d174d; }
-.profile-title--hyunjin-number-one-fan { background: linear-gradient(135deg, #e0f2fe, #7dd3fc); color: #075985; box-shadow: 0 2px 0 #075985; }
+.profile-title { display: inline-block; padding: .5rem .85rem; border: 2px solid hsl(var(--title-hue) 58% 34%); border-radius: 999px; background: linear-gradient(135deg, hsl(var(--title-hue) 92% 94%), hsl(var(--title-hue) 76% 76%)); color: hsl(var(--title-hue) 58% 28%); box-shadow: 0 2px 0 hsl(var(--title-hue) 58% 34%); font-size: .75rem; font-weight: 800; letter-spacing: .08em; line-height: 1; text-transform: uppercase; }
 .profile-bio { margin-top: .45rem; color: var(--text); max-width: 42rem; white-space: pre-wrap; }
 .profile-saved { margin-top: 1rem; color: var(--accent); font-weight: 600; }
 .profile-history { margin-top: 2rem; }

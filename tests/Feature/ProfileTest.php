@@ -107,12 +107,25 @@ class ProfileTest extends TestCase
         $user = User::factory()->create();
         $quiz = Quiz::create(['name' => "How Well Do You Know ENHYPEN's Ni-ki?"]);
 
-        $firstAward = $user->awardTitleForPerfectQuiz($quiz, 10, 10);
-        $secondAward = $user->awardTitleForPerfectQuiz($quiz, 10, 10);
+        $result = (object) ['member_id' => 7, 'name' => 'Ni-ki'];
+        $firstAward = $user->awardTitleForQuizResult($quiz, 'percent', $result, 10, 10);
+        $secondAward = $user->awardTitleForQuizResult($quiz, 'percent', $result, 10, 10);
 
         $this->assertNotNull($firstAward);
         $this->assertNull($secondAward);
-        $this->assertSame(1, $user->titleAwards()->where('title_key', 'niki-number-one-fan')->count());
+        $this->assertSame(1, $user->titleAwards()->where('title_key', 'member-7-number-one-fan')->count());
+    }
+
+    public function test_personality_quiz_results_award_titles_from_their_result(): void
+    {
+        $user = User::factory()->create();
+        $quiz = Quiz::create(['name' => 'Which album are you?']);
+
+        $albumAward = $user->awardTitleForQuizResult($quiz, 'album', (object) ['id' => 21, 'title' => 'HOP']);
+        $memberAward = $user->awardTitleForQuizResult($quiz, 'member', (object) ['id' => 16, 'name' => 'Hyunjin']);
+
+        $this->assertSame('HOP Enjoyer', $albumAward->title_label);
+        $this->assertSame("Hyunjin's Twin", $memberAward->title_label);
     }
 
     public function test_awarded_title_can_be_equipped_from_quiz_result_action(): void
