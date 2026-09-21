@@ -30,6 +30,11 @@
                 <div class="admin-title">Guess Idol Images</div>
                 <div class="admin-desc">Manage detail images for dynamic guess-idol rounds.</div>
             </a>
+
+            <a href="{{ route('admin.guess-songs.index') }}" class="admin-tile">
+                <div class="admin-title">Guess Songs</div>
+                <div class="admin-desc">Manage audio clips, titles and artists for guess-the-song rounds.</div>
+            </a>
         </div>
     </div>
 </div>

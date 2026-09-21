@@ -298,6 +298,16 @@
    border: 1px solid rgba(0,0,0,0.06);
    background: rgba(255,255,255,0.35);
 }
+.tier-badge {
+   display: inline-block;
+   padding: 0.3rem 0.85rem;
+   border-radius: 999px;
+   background: var(--brand-1);
+   color: var(--brand-2);
+   font-weight: 700;
+   font-size: 0.95rem;
+   letter-spacing: 0.02em;
+}
 .answer-label:hover,
 .answer-label:focus-within {
    border-color: var(--brand-1);

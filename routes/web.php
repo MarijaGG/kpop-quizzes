@@ -7,7 +7,9 @@ use App\Http\Controllers\Admin\AlbumController;
 use App\Http\Controllers\Admin\QuizController;
 use App\Http\Controllers\Api\StaticApiController;
 use App\Http\Controllers\Admin\GuessIdolImageController;
+use App\Http\Controllers\Admin\GuessSongController as AdminGuessSongController;
 use App\Http\Controllers\GuessIdolController;
+use App\Http\Controllers\GuessSongController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -40,6 +42,9 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('guess-idol-images', GuessIdolImageController::class)
             ->parameters(['guess-idol-images' => 'guessIdolImage'])
             ->except(['show']);
+        Route::resource('guess-songs', AdminGuessSongController::class)
+            ->parameters(['guess-songs' => 'guessSong'])
+            ->except(['show']);
         // question/answer management for quizzes
         Route::get('quizzes/{quiz}/questions', [App\Http\Controllers\Admin\QuestionController::class, 'index'])->name('quizzes.questions.index');
         Route::get('quizzes/{quiz}/questions/create', [App\Http\Controllers\Admin\QuestionController::class, 'create'])->name('quizzes.questions.create');
@@ -60,6 +65,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/guess-idol/take', [GuessIdolController::class, 'take'])->name('guess-idol.take');
     Route::post('/guess-idol/answer', [GuessIdolController::class, 'answer'])->name('guess-idol.answer');
     Route::get('/guess-idol/result', [GuessIdolController::class, 'result'])->name('guess-idol.result');
+
+    Route::get('/guess-song', [GuessSongController::class, 'index'])->name('guess-song.index');
+    Route::post('/guess-song/start', [GuessSongController::class, 'start'])->name('guess-song.start');
+    Route::get('/guess-song/take', [GuessSongController::class, 'take'])->name('guess-song.take');
+    Route::post('/guess-song/answer', [GuessSongController::class, 'answer'])->name('guess-song.answer');
+    Route::get('/guess-song/result', [GuessSongController::class, 'result'])->name('guess-song.result');
 
     // Static JSON API (no DB required) — protected
     Route::prefix('api')->name('api.')->group(function () {
