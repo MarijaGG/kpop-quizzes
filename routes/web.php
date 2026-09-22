@@ -78,9 +78,9 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('{resource?}', [StaticApiController::class, 'list']);
         Route::get('{resource}/{id}', [StaticApiController::class, 'show']);
-        Route::post('{resource}', [StaticApiController::class, 'store']);
-        Route::put('{resource}/{id}', [StaticApiController::class, 'update']);
-        Route::patch('{resource}/{id}', [StaticApiController::class, 'update']);
-        Route::delete('{resource}/{id}', [StaticApiController::class, 'destroy']);
+        Route::post('{resource}', [StaticApiController::class, 'store'])->middleware('admin');
+        Route::put('{resource}/{id}', [StaticApiController::class, 'update'])->middleware('admin');
+        Route::patch('{resource}/{id}', [StaticApiController::class, 'update'])->middleware('admin');
+        Route::delete('{resource}/{id}', [StaticApiController::class, 'destroy'])->middleware('admin');
     });
 });
