@@ -37,13 +37,33 @@
         <div class="profile-history-pagination">
             <nav aria-label="Quiz history pages">
                 <div>
-                    @for($page = 1; $page <= $results->lastPage(); $page++)
+                    @php
+                        $lastPage = $results->lastPage();
+                        $currentPage = $results->currentPage();
+                        $firstPage = max(1, min($currentPage - 2, $lastPage - 4));
+                        $lastVisiblePage = min($lastPage, $firstPage + 4);
+                    @endphp
+                    @if($currentPage > 1)
+                        <a href="{{ $results->url(1) }}" aria-label="First page" title="First page">&laquo;</a>
+                        <a href="{{ $results->previousPageUrl() }}" aria-label="Previous page" title="Previous page">&lsaquo;</a>
+                    @else
+                        <span aria-disabled="true"><span>&laquo;</span></span>
+                        <span aria-disabled="true"><span>&lsaquo;</span></span>
+                    @endif
+                    @for($page = $firstPage; $page <= $lastVisiblePage; $page++)
                         @if($page === $results->currentPage())
                             <span aria-current="page"><span>{{ $page }}</span></span>
                         @else
                             <a href="{{ $results->url($page) }}">{{ $page }}</a>
                         @endif
                     @endfor
+                    @if($currentPage < $lastPage)
+                        <a href="{{ $results->nextPageUrl() }}" aria-label="Next page" title="Next page">&rsaquo;</a>
+                        <a href="{{ $results->url($lastPage) }}" aria-label="Last page" title="Last page">&raquo;</a>
+                    @else
+                        <span aria-disabled="true"><span>&rsaquo;</span></span>
+                        <span aria-disabled="true"><span>&raquo;</span></span>
+                    @endif
                 </div>
             </nav>
         </div>

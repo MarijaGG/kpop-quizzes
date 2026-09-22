@@ -9,9 +9,17 @@
 
             <div style="text-align:left;margin-top:1.5rem;">
                 @foreach($run['responses'] as $response)
-                    <div class="history-item" style="margin-bottom:.5rem;">
-                        <div><strong>{{ $response['title'] }}</strong> — {{ $response['artist'] }}</div>
-                        <span class="muted">{{ $response['correct'] ? '+'.$response['points'].' pts' : 'Missed' }}</span>
+                    <div class="guess-song-result-item {{ $response['correct'] ? 'is-correct' : 'is-incorrect' }}">
+                        <div>
+                            <strong>{{ $response['correct'] ? 'Correct' : 'Incorrect' }}</strong>
+                            <div class="guess-song-answer">{{ $response['correct'] ? ($response['guess'] ?: 'Correct answer') : ('Your answer: '.($response['guess'] ?: 'I don\'t know')) }}</div>
+                            @if(!$response['correct'])
+                                <div class="guess-song-answer">Correct answer: <strong>{{ $response['title'] }} — {{ $response['artist'] }}</strong></div>
+                            @endif
+                        </div>
+                        @if($response['points'] > 0)
+                            <span class="guess-song-points">+{{ $response['points'] }} pts</span>
+                        @endif
                     </div>
                 @endforeach
             </div>

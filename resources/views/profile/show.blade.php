@@ -43,3 +43,43 @@
         </div>
     </div>
 </x-app-layout>
+
+<script>
+    document.addEventListener('click', function (event) {
+        const link = event.target.closest('.profile-history-pagination a');
+        if (!link) return;
+
+        event.preventDefault();
+        loadQuizHistory(link.href, true);
+    });
+
+    window.addEventListener('popstate', function () {
+        loadQuizHistory(window.location.href, false);
+    });
+
+    function loadQuizHistory(url, updateHistory) {
+        const historySection = document.querySelector('.profile-history');
+        if (!historySection) return;
+
+        historySection.setAttribute('aria-busy', 'true');
+        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(response => {
+                if (!response.ok) throw new Error('Unable to load quiz history');
+                return response.text();
+            })
+            .then(html => {
+                const replacement = new DOMParser()
+                    .parseFromString(html, 'text/html')
+                    .querySelector('.profile-history');
+                if (!replacement) throw new Error('Quiz history was not found');
+
+                historySection.replaceWith(replacement);
+                if (updateHistory) window.history.pushState({}, '', url);
+            })
+            .catch(() => historySection.removeAttribute('aria-busy'))
+            .finally(() => {
+                const currentSection = document.querySelector('.profile-history');
+                currentSection?.removeAttribute('aria-busy');
+            });
+    }
+</script>

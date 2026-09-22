@@ -27,7 +27,7 @@ class ProfileController extends Controller
         $quizNames = Quiz::pluck('name', 'id')->mapWithKeys(fn ($name, $id) => [(string) $id => $name])->all();
         $favorites = $request->user()->favorites()->get()->groupBy('item_type');
 
-        return view('profile.show', [
+        $viewData = [
             'user' => $request->user(),
             'avatarMember' => $request->user()->avatarMember(),
             'selectedTitle' => $request->user()->selectedTitleLabel(),
@@ -41,7 +41,13 @@ class ProfileController extends Controller
                 'member' => $this->resolveFavorites($favorites->get('member', collect()), $members),
                 'album' => $this->resolveFavorites($favorites->get('album', collect()), $albums),
             ],
-        ]);
+        ];
+
+        if ($request->ajax()) {
+            return view('profile.partials.quiz-history', $viewData);
+        }
+
+        return view('profile.show', $viewData);
     }
 
     public function updateFavorites(FavoriteUpdateRequest $request): RedirectResponse

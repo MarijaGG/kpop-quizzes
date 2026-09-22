@@ -244,6 +244,11 @@
 .guess-question-image { display: block; width: min(100%, 24rem); aspect-ratio: 1; object-fit: contain; padding: .5rem; background: rgba(255,255,255,.7); margin: 1rem auto; border-radius: .5rem; }
 .guess-answer-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; }
 .guess-final-score { margin-top: 1rem; color: var(--brand-1); font-size: 2rem; font-weight: 800; }
+.guess-song-result-item { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: .65rem; padding: .85rem 1rem; border: 1px solid; border-radius: .5rem; }
+.guess-song-result-item.is-correct { border-color: #4f9d69; background: rgba(79,157,105,.12); color: #28613b; }
+.guess-song-result-item.is-incorrect { border-color: #c75c5c; background: rgba(199,92,92,.12); color: #8b2f2f; }
+.guess-song-answer { margin-top: .25rem; font-size: .9rem; }
+.guess-song-points { flex: 0 0 auto; padding: .3rem .55rem; border-radius: .35rem; background: var(--brand-1); color: var(--brand-2); font-weight: 800; white-space: nowrap; }
 @media (max-width: 640px) {
    .profile-summary { flex-direction: column; padding: 1.25rem; }
    .profile-summary-heading { flex-direction: column; }

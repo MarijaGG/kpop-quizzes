@@ -90,23 +90,27 @@ class GuessSongController extends Controller
         $index = $run['index'];
         $song = $run['songs'][$index];
         $tier = $run['tier'];
-        $correct = ! ($validated['skip'] ?? false) && $this->isCorrectGuess($validated['guess'] ?? '', $song);
+        $isSkip = filter_var($validated['skip'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $guess = trim($validated['guess'] ?? '');
+        $correct = ! $isSkip && $this->isCorrectGuess($guess, $song);
 
         if ($correct) {
             $run['responses'][] = [
                 'title' => $song['title'],
                 'artist' => $song['artist'],
+                'guess' => $guess,
                 'points' => self::TIERS[$tier]['points'],
                 'correct' => true,
             ];
             $run['index'] = $index + 1;
             $run['tier'] = 'hard';
-        } elseif (self::TIERS[$tier]['next']) {
+        } elseif ($isSkip && self::TIERS[$tier]['next']) {
             $run['tier'] = self::TIERS[$tier]['next'];
         } else {
             $run['responses'][] = [
                 'title' => $song['title'],
                 'artist' => $song['artist'],
+                'guess' => $guess,
                 'points' => 0,
                 'correct' => false,
             ];
