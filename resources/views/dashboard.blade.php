@@ -5,15 +5,19 @@
 
     <div class="page-container">
         <div class="page-inner">
-            <!-- Large full-width CTA card -->
-            <div class="card hero-card">
-                <div class="card-content">
-                    <div class="hero-inner">
-                        <div class="hero-cta">
-                            <a href="{{ route('quizzes.index') }}" class="hero-link">Go to all quizzes →</a>
-                        </div>
-                    </div>
-                </div>
+            <div class="dashboard-actions">
+                <a href="{{ route('quizzes.index') }}" class="dashboard-action-card dashboard-action-card-quizzes">
+                    <span class="dashboard-action-title">Quizzes <span aria-hidden="true">↗</span></span>
+                    <span class="dashboard-action-description">Explore personality and knowledge quizzes.</span>
+                </a>
+                <a href="{{ route('guess-idol.index') }}" class="dashboard-action-card dashboard-action-card-idol">
+                    <span class="dashboard-action-title">Guess the Idol <span aria-hidden="true">↗</span></span>
+                    <span class="dashboard-action-description">Identify idols from detail images.</span>
+                </a>
+                <a href="{{ route('guess-song.index') }}" class="dashboard-action-card dashboard-action-card-song">
+                    <span class="dashboard-action-title">Guess the Song <span aria-hidden="true">↗</span></span>
+                    <span class="dashboard-action-description">Listen to clips and name the song.</span>
+                </a>
             </div>
 
             <!-- Recently added quizzes section -->
@@ -24,7 +28,7 @@
 
                 <div class="card-body">
                     @php
-                        $recent = $recentQuizzes ?? \App\Models\Quiz::latest()->take(5)->get();
+                        $recent = $recentQuizzes;
                     @endphp
 
                     <div class="recent-gallery">
