@@ -104,7 +104,7 @@ class GuessIdolController extends Controller
         if ($run['index'] >= count($run['questions'])) {
             $correct = collect($run['responses'])->filter(fn ($response) => $response['choice'] === $response['correct'])->count();
             $run['score'] = $correct;
-            $this->saveResult($run);
+            $run['newTitle'] = $this->saveResult($run);
             session(['guess_idol_run' => $run]);
             return redirect()->route('guess-idol.result');
         }
@@ -123,28 +123,42 @@ class GuessIdolController extends Controller
         return view('guess-idol.result', [
             'run' => $run,
             'group' => Group::find($run['group_id'])?->toArray(),
+            'newTitle' => $run['newTitle'] ?? null,
         ]);
     }
 
-    private function saveResult(array $run): void
+    private function saveResult(array $run): ?array
     {
         if (! auth()->check() || session()->has('guess_idol_result_saved')) {
-            return;
+            return null;
         }
-        $groupName = Group::find($run['group_id'])?->name ?? 'TXT';
+        $group = Group::find($run['group_id']);
+        $groupName = $group?->name ?? 'TXT';
         $difficulty = ucfirst($run['difficulty']);
+        $total = count($run['questions']);
         QuizResult::create([
             'user_id' => auth()->id(),
             'quiz_id' => 0,
             'quiz_name' => "Guess the {$groupName} Member — {$difficulty}",
             'result_type' => 'guess_idol',
             'correct_answers' => $run['score'],
-            'total_questions' => count($run['questions']),
+            'total_questions' => $total,
             'result_name' => null,
             'total_points' => $run['score'],
             'details' => ['difficulty' => $run['difficulty'], 'group_id' => $run['group_id']],
         ]);
         session(['guess_idol_result_saved' => true]);
+
+        if ($group && $run['difficulty'] === 'hard' && $run['score'] === $total) {
+            $award = auth()->user()->titleAwards()->firstOrCreate(
+                ['title_key' => 'guess-idol-group-'.$group->id.'-guru'],
+                ['title_label' => "{$group->name} Guru", 'awarded_at' => now()],
+            );
+
+            return $award->wasRecentlyCreated ? ['key' => $award->title_key, 'label' => $award->title_label] : null;
+        }
+
+        return null;
     }
 
 }
