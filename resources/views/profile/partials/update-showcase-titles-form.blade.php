@@ -8,17 +8,27 @@
         @csrf
         @method('patch')
 
-        @php($availableShowcaseTitles = array_diff_key($unlockedTitles, [$user->selected_title => true]))
+        @php
+            $availableShowcaseTitles = array_diff_key($unlockedTitles, [$user->selected_title => true]);
+            $initialShowcaseTitles = old('showcase_titles', $showcaseTitleKeys);
+        @endphp
         @if(empty($availableShowcaseTitles))
             <p class="text-sm text-gray-600">Unlock more titles to add them to your showcase.</p>
         @else
-            <div class="showcase-title-options">
-                @foreach($availableShowcaseTitles as $key => $title)
-                    <label class="showcase-title-option">
-                        <input type="checkbox" name="showcase_titles[]" value="{{ $key }}" @checked(in_array($key, old('showcase_titles', $showcaseTitleKeys), true))>
-                        <span>{{ $title['label'] }}</span>
-                    </label>
-                @endforeach
+            <div class="showcase-title-picker">
+                <label for="showcase-title-picker" class="form-label">Choose a title</label>
+                <div class="showcase-title-picker-row">
+                    <select id="showcase-title-picker" class="form-control">
+                        <option value="">Select an unlocked title</option>
+                        @foreach($availableShowcaseTitles as $key => $title)
+                            <option value="{{ $key }}">{{ $title['label'] }}</option>
+                        @endforeach
+                    </select>
+                    <button type="button" id="add-showcase-title" class="btn btn-ghost" disabled>Add title</button>
+                </div>
+                <div id="showcase-title-list" class="showcase-title-list" aria-live="polite"></div>
+                <p id="showcase-title-limit" class="muted" hidden>You can showcase up to three titles.</p>
+                <script type="application/json" id="initial-showcase-titles">@json(array_values($initialShowcaseTitles))</script>
             </div>
         @endif
 
@@ -30,12 +40,62 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const checkboxes = document.querySelectorAll('.showcase-title-option input[type="checkbox"]');
-        checkboxes.forEach(function (checkbox) {
-            checkbox.addEventListener('change', function () {
-                const selected = Array.from(checkboxes).filter(item => item.checked);
-                if (selected.length > 3) checkbox.checked = false;
+        const picker = document.getElementById('showcase-title-picker');
+        if (!picker) return;
+
+        const addButton = document.getElementById('add-showcase-title');
+        const list = document.getElementById('showcase-title-list');
+        const limitMessage = document.getElementById('showcase-title-limit');
+        const labels = new Map(Array.from(picker.options)
+            .filter(option => option.value)
+            .map(option => [option.value, option.textContent.trim()]));
+        const initialTitles = JSON.parse(document.getElementById('initial-showcase-titles').textContent);
+        let selectedTitles = initialTitles.filter(key => labels.has(key)).slice(0, 3);
+
+        function renderTitles() {
+            list.replaceChildren();
+            selectedTitles.forEach(function (key) {
+                const row = document.createElement('div');
+                row.className = 'showcase-title-row';
+
+                const label = document.createElement('span');
+                label.textContent = labels.get(key);
+
+                const hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = 'showcase_titles[]';
+                hidden.value = key;
+
+                const removeButton = document.createElement('button');
+                removeButton.type = 'button';
+                removeButton.className = 'btn btn-ghost';
+                removeButton.textContent = 'Remove';
+                removeButton.setAttribute('aria-label', `Remove ${labels.get(key)}`);
+                removeButton.addEventListener('click', function () {
+                    selectedTitles = selectedTitles.filter(item => item !== key);
+                    renderTitles();
+                });
+
+                row.append(label, hidden, removeButton);
+                list.appendChild(row);
             });
+
+            picker.querySelectorAll('option').forEach(function (option) {
+                option.disabled = selectedTitles.includes(option.value);
+            });
+            limitMessage.hidden = selectedTitles.length < 3;
+            addButton.disabled = selectedTitles.length >= 3 || !picker.value;
+        }
+
+        picker.addEventListener('change', renderTitles);
+        addButton.addEventListener('click', function () {
+            if (picker.value && !selectedTitles.includes(picker.value) && selectedTitles.length < 3) {
+                selectedTitles.push(picker.value);
+                picker.value = '';
+                renderTitles();
+            }
         });
+
+        renderTitles();
     });
 </script>
