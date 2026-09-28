@@ -31,6 +31,7 @@ class ProfileController extends Controller
             'user' => $request->user(),
             'avatarMember' => $request->user()->avatarMember(),
             'selectedTitle' => $request->user()->selectedTitleLabel(),
+            'showcaseTitles' => $this->showcaseTitles($request->user()),
             'results' => $request->user()->quizResults()->latest()->paginate(5),
             'quizNames' => $quizNames,
             'groups' => $groups,
@@ -86,6 +87,7 @@ class ProfileController extends Controller
             'groups' => Group::orderBy('name')->get()->map->toArray()->all(),
             'avatarMember' => $request->user()->avatarMember(),
             'unlockedTitles' => $request->user()->unlockedTitles(),
+            'showcaseTitleKeys' => $request->user()->showcase_titles ?? [],
         ]);
     }
 
@@ -125,6 +127,22 @@ class ProfileController extends Controller
         return Redirect::route('profile')->with('status', 'title-equipped');
     }
 
+    public function updateShowcaseTitles(Request $request): RedirectResponse
+    {
+        $availableTitles = array_diff(
+            array_keys($request->user()->unlockedTitles()),
+            [$request->user()->selected_title],
+        );
+        $showcaseTitles = $request->validate([
+            'showcase_titles' => ['nullable', 'array', 'max:3'],
+            'showcase_titles.*' => ['required', 'string', 'distinct', Rule::in($availableTitles)],
+        ])['showcase_titles'] ?? [];
+
+        $request->user()->update(['showcase_titles' => array_values($showcaseTitles)]);
+
+        return Redirect::route('profile')->with('status', 'showcase-titles-updated');
+    }
+
     /**
      * Delete the user's account.
      */
@@ -159,5 +177,17 @@ class ProfileController extends Controller
         }
 
         return $resolved;
+    }
+
+    private function showcaseTitles($user): array
+    {
+        $unlockedTitles = $user->unlockedTitles();
+
+        return collect($user->showcase_titles ?? [])
+            ->reject(fn ($key) => $key === $user->selected_title)
+            ->map(fn ($key) => isset($unlockedTitles[$key]) ? ['key' => $key] + $unlockedTitles[$key] : null)
+            ->filter()
+            ->values()
+            ->all();
     }
 }

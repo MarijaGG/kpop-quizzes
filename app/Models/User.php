@@ -36,6 +36,7 @@ class User extends Authenticatable
         'name',
         'bio',
         'selected_title',
+        'showcase_titles',
         'email',
         'avatar_member_id',
         'password',
@@ -61,6 +62,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'showcase_titles' => 'array',
         ];
     }
 

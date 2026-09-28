@@ -22,6 +22,13 @@
                                     <span class="profile-title" style="--title-hue: {{ $user->selectedTitleHue() }};">{{ $selectedTitle }}</span>
                                 @endif
                             </div>
+                            @if(!empty($showcaseTitles))
+                                <div class="profile-showcase-titles" aria-label="Showcased titles">
+                                    @foreach($showcaseTitles as $title)
+                                        <span class="profile-title profile-title-showcase" style="--title-hue: {{ crc32($title['key']) % 360 }};">{{ $title['label'] }}</span>
+                                    @endforeach
+                                </div>
+                            @endif
                             <p class="profile-bio">{{ $user->bio ?: 'No bio yet.' }}</p>
                         </div>
                         <a href="{{ route('profile.edit') }}" class="btn btn-primary">Edit profile</a>
@@ -35,6 +42,10 @@
 
             @if(session('status') === 'favorites-updated')
                 <p class="profile-saved">Favourites updated.</p>
+            @endif
+
+            @if(session('status') === 'showcase-titles-updated')
+                <p class="profile-saved">Showcased titles updated.</p>
             @endif
 
             @include('profile.partials.favourites')

@@ -160,6 +160,54 @@ class ProfileTest extends TestCase
         $this->assertSame('album-21-enjoyer', $user->refresh()->selected_title);
     }
 
+    public function test_user_can_select_up_to_three_unlocked_showcase_titles(): void
+    {
+        $user = User::factory()->create(['selected_title' => 'main-title']);
+        foreach (['title-one', 'title-two', 'title-three', 'main-title'] as $key) {
+            $user->titleAwards()->create([
+                'title_key' => $key,
+                'title_label' => ucfirst(str_replace('-', ' ', $key)),
+                'awarded_at' => now(),
+            ]);
+        }
+
+        $response = $this->actingAs($user)->patch('/profile/showcase-titles', [
+            'showcase_titles' => ['title-one', 'title-two', 'title-three'],
+        ]);
+
+        $response->assertSessionHasNoErrors()->assertRedirect('/profile');
+        $this->assertSame(['title-one', 'title-two', 'title-three'], $user->refresh()->showcase_titles);
+        $this->actingAs($user)->get('/profile')
+            ->assertOk()
+            ->assertSee('Title one')
+            ->assertSee('Title two')
+            ->assertSee('Title three');
+    }
+
+    public function test_showcase_titles_reject_more_than_three_or_the_main_title(): void
+    {
+        $user = User::factory()->create(['selected_title' => 'main-title']);
+        foreach (['main-title', 'title-one', 'title-two', 'title-three', 'title-four'] as $key) {
+            $user->titleAwards()->create([
+                'title_key' => $key,
+                'title_label' => ucfirst(str_replace('-', ' ', $key)),
+                'awarded_at' => now(),
+            ]);
+        }
+
+        $this->actingAs($user)->from('/profile/edit')
+            ->patch('/profile/showcase-titles', [
+                'showcase_titles' => ['title-one', 'title-two', 'title-three', 'title-four'],
+            ])
+            ->assertSessionHasErrors('showcase_titles');
+
+        $this->actingAs($user)->from('/profile/edit')
+            ->patch('/profile/showcase-titles', ['showcase_titles' => ['main-title']])
+            ->assertSessionHasErrors('showcase_titles.0');
+
+        $this->assertSame([], $user->refresh()->showcase_titles ?? []);
+    }
+
     public function test_user_can_delete_their_account(): void
     {
         $user = User::factory()->create();

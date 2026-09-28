@@ -35,6 +35,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile/history', [ProfileController::class, 'history'])->name('profile.history');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::patch('/profile/title', [ProfileController::class, 'equipTitle'])->name('profile.title.equip');
+    Route::patch('/profile/showcase-titles', [ProfileController::class, 'updateShowcaseTitles'])->name('profile.showcase-titles.update');
     Route::patch('/profile/favourites', [ProfileController::class, 'updateFavorites'])->name('profile.favourites.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
