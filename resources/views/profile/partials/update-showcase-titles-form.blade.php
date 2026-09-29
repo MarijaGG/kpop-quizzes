@@ -1,22 +1,15 @@
-<section>
-    <header>
-        <h2 class="text-lg font-medium text-gray-900">Showcase titles</h2>
-        <p class="mt-1 text-sm text-gray-600">Choose up to three unlocked titles to display below your name.</p>
-    </header>
-
-    <form method="post" action="{{ route('profile.showcase-titles.update') }}" class="mt-6 space-y-4">
-        @csrf
-        @method('patch')
-
+<div class="showcase-title-settings">
+        <h4 class="text-sm font-medium text-gray-900">Showcase titles</h4>
+        <input type="hidden" name="_showcase_titles_present" value="1">
         @php
-            $availableShowcaseTitles = array_diff_key($unlockedTitles, [$user->selected_title => true]);
+            $mainTitle = old('selected_title', $user->selected_title);
+            $availableShowcaseTitles = array_diff_key($unlockedTitles, [$mainTitle => true]);
             $initialShowcaseTitles = old('showcase_titles', $showcaseTitleKeys);
         @endphp
         @if(empty($availableShowcaseTitles))
             <p class="text-sm text-gray-600">Unlock more titles to add them to your showcase.</p>
         @else
             <div class="showcase-title-picker">
-                <label for="showcase-title-picker" class="form-label">Choose a title</label>
                 <div class="showcase-title-picker-row">
                     <select id="showcase-title-picker" class="form-control">
                         <option value="">Select an unlocked title</option>
@@ -34,9 +27,7 @@
 
         <x-input-error class="mt-2" :messages="$errors->get('showcase_titles')" />
         <x-input-error class="mt-2" :messages="$errors->get('showcase_titles.*')" />
-        <x-primary-button>{{ __('Save showcased titles') }}</x-primary-button>
-    </form>
-</section>
+    </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -46,6 +37,7 @@
         const addButton = document.getElementById('add-showcase-title');
         const list = document.getElementById('showcase-title-list');
         const limitMessage = document.getElementById('showcase-title-limit');
+        const mainTitle = document.getElementById('selected_title');
         const labels = new Map(Array.from(picker.options)
             .filter(option => option.value)
             .map(option => [option.value, option.textContent.trim()]));
@@ -88,6 +80,10 @@
         }
 
         picker.addEventListener('change', renderTitles);
+        mainTitle.addEventListener('change', function () {
+            selectedTitles = selectedTitles.filter(key => key !== mainTitle.value);
+            renderTitles();
+        });
         addButton.addEventListener('click', function () {
             if (picker.value && !selectedTitles.includes(picker.value) && selectedTitles.length < 3) {
                 selectedTitles.push(picker.value);

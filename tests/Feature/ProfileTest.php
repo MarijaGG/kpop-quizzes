@@ -184,6 +184,30 @@ class ProfileTest extends TestCase
             ->assertSee('Title three');
     }
 
+    public function test_main_and_showcase_titles_save_together_from_profile_edit(): void
+    {
+        $user = User::factory()->create();
+        foreach (['main-title', 'showcase-one', 'showcase-two'] as $key) {
+            $user->titleAwards()->create([
+                'title_key' => $key,
+                'title_label' => ucfirst(str_replace('-', ' ', $key)),
+                'awarded_at' => now(),
+            ]);
+        }
+
+        $this->actingAs($user)->patch('/profile', [
+            'name' => $user->name,
+            'email' => $user->email,
+            'selected_title' => 'main-title',
+            '_showcase_titles_present' => '1',
+            'showcase_titles' => ['showcase-one', 'showcase-two'],
+        ])->assertSessionHasNoErrors()->assertRedirect('/profile');
+
+        $user->refresh();
+        $this->assertSame('main-title', $user->selected_title);
+        $this->assertSame(['showcase-one', 'showcase-two'], $user->showcase_titles);
+    }
+
     public function test_showcase_titles_reject_more_than_three_or_the_main_title(): void
     {
         $user = User::factory()->create(['selected_title' => 'main-title']);

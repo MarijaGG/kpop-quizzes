@@ -16,16 +16,16 @@
                 <div class="profile-summary-content">
                     <div class="profile-summary-heading">
                         <div>
-                            <div class="profile-name-row">
+                            <div class="profile-name-row {{ $selectedTitle ? 'has-main-title' : '' }}" @if($selectedTitle) style="--title-hue: {{ $user->selectedTitleHue() }};" @endif>
                                 <h1>{{ $user->name }}</h1>
                                 @if($selectedTitle)
-                                    <span class="profile-title" style="--title-hue: {{ $user->selectedTitleHue() }};">{{ $selectedTitle }}</span>
+                                    <span class="profile-title profile-title-main">{{ $selectedTitle }}</span>
                                 @endif
                             </div>
                             @if(!empty($showcaseTitles))
-                                <div class="profile-showcase-titles" aria-label="Showcased titles">
+                                <div class="profile-showcase-titles {{ $selectedTitle ? 'has-main-title' : '' }}" @if($selectedTitle) style="--title-hue: {{ $user->selectedTitleHue() }};" @endif aria-label="Showcased titles">
                                     @foreach($showcaseTitles as $title)
-                                        <span class="profile-title profile-title-showcase" style="--title-hue: {{ crc32($title['key']) % 360 }};">{{ $title['label'] }}</span>
+                                        <span class="profile-showcase-title">{{ $title['label'] }}</span>
                                     @endforeach
                                 </div>
                             @endif

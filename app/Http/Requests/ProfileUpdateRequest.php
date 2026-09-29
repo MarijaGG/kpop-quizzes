@@ -13,6 +13,10 @@ class ProfileUpdateRequest extends FormRequest
         if ($this->input('avatar_member_id') === '') {
             $this->merge(['avatar_member_id' => null]);
         }
+
+        if ($this->boolean('_showcase_titles_present') && ! $this->has('showcase_titles')) {
+            $this->merge(['showcase_titles' => []]);
+        }
     }
 
     /**
@@ -38,6 +42,17 @@ class ProfileUpdateRequest extends FormRequest
                 'nullable',
                 'string',
                 Rule::in(array_keys($this->user()->unlockedTitles())),
+            ],
+            '_showcase_titles_present' => ['sometimes', 'accepted'],
+            'showcase_titles' => ['sometimes', 'array', 'max:3'],
+            'showcase_titles.*' => [
+                'required',
+                'string',
+                'distinct',
+                Rule::in(array_diff(
+                    array_keys($this->user()->unlockedTitles()),
+                    [$this->input('selected_title', $this->user()->selected_title)],
+                )),
             ],
         ];
     }
