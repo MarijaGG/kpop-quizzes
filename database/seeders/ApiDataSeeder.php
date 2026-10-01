@@ -23,6 +23,7 @@ class ApiDataSeeder extends Seeder
         }
 
         $data = json_decode(file_get_contents($path), true, 512, JSON_THROW_ON_ERROR);
+        $this->validateReferences($data);
 
         DB::transaction(function () use ($data): void {
             $this->seedGroups($data['groups'] ?? []);
@@ -114,11 +115,6 @@ class ApiDataSeeder extends Seeder
     private function seedQuestions(array $questions): void
     {
         foreach ($questions as $question) {
-            if (! Quiz::whereKey($question['quiz_id'])->exists()) {
-                $this->command?->warn("Skipping question {$question['id']}: quiz {$question['quiz_id']} does not exist.");
-                continue;
-            }
-
             Question::updateOrCreate(
                 ['id' => $question['id']],
                 [
@@ -133,17 +129,7 @@ class ApiDataSeeder extends Seeder
 
     private function seedAnswers(array $answers): void
     {
-        // The legacy source identifies quiz 1 answers as questions 1-10, while its database questions are 21-30.
-        $questionIdMap = array_combine(range(1, 10), range(21, 30));
-
         foreach ($answers as $answer) {
-            $questionId = $questionIdMap[$answer['question_id']] ?? $answer['question_id'];
-
-            if (! Question::whereKey($questionId)->exists()) {
-                $this->command?->warn("Skipping answer {$answer['id']}: question {$answer['question_id']} does not exist.");
-                continue;
-            }
-
             $meta = $answer['meta'] ?? [];
 
             foreach (['target_type', 'target_id'] as $key) {
@@ -155,12 +141,32 @@ class ApiDataSeeder extends Seeder
             Answer::updateOrCreate(
                 ['id' => $answer['id']],
                 [
-                    'question_id' => $questionId,
+                    'question_id' => $answer['question_id'],
                     'text' => $answer['text'],
                     'points' => $answer['points'] ?? 0,
                     'meta' => $meta ?: null,
                 ]
             );
+        }
+    }
+
+    private function validateReferences(array $data): void
+    {
+        $quizIds = array_fill_keys(array_map(fn ($quiz) => (string) $quiz['id'], $data['quizzes'] ?? []), true);
+        $questionIds = [];
+
+        foreach ($data['questions'] ?? [] as $question) {
+            if (! isset($quizIds[(string) ($question['quiz_id'] ?? '')])) {
+                throw new RuntimeException("Question {$question['id']} references missing quiz {$question['quiz_id']}.");
+            }
+
+            $questionIds[(string) $question['id']] = true;
+        }
+
+        foreach ($data['answers'] ?? [] as $answer) {
+            if (! isset($questionIds[(string) ($answer['question_id'] ?? '')])) {
+                throw new RuntimeException("Answer {$answer['id']} references missing question {$answer['question_id']}.");
+            }
         }
     }
 }

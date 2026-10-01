@@ -56,6 +56,7 @@
         @for($i=0;$i<10;$i++)
             <div class="mb-2">
                 <label class="form-label">Question {{ $i+1 }}</label>
+                <input type="hidden" name="question_ids[{{ $i }}]" value="{{ $existingQuestions[$i]->id ?? '' }}">
                 <textarea name="questions[]" class="form-control" required>{{ old('questions.'.$i, $existingQuestions[$i]->text ?? '') }}</textarea>
             </div>
         @endfor

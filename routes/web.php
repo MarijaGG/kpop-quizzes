@@ -55,6 +55,7 @@ Route::middleware(['auth'])->group(function () {
         // question/answer management for quizzes
         Route::get('quizzes/{quiz}/questions', [App\Http\Controllers\Admin\QuestionController::class, 'index'])->name('quizzes.questions.index');
         Route::get('quizzes/{quiz}/questions/create', [App\Http\Controllers\Admin\QuestionController::class, 'create'])->name('quizzes.questions.create');
+        Route::post('quizzes/{quiz}/questions', [App\Http\Controllers\Admin\QuestionController::class, 'store'])->name('quizzes.questions.store');
         Route::get('quizzes/{quiz}/questions/{question}/edit', [App\Http\Controllers\Admin\QuestionController::class, 'edit'])->name('quizzes.questions.edit');
         Route::post('quizzes/{quiz}/questions/{question}', [App\Http\Controllers\Admin\QuestionController::class, 'update'])->name('quizzes.questions.update');
     });
