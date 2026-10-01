@@ -113,7 +113,24 @@ class ProfileTest extends TestCase
 
         $this->assertNotNull($firstAward);
         $this->assertNull($secondAward);
-        $this->assertSame(1, $user->titleAwards()->where('title_key', 'member-7-number-one-fan')->count());
+        $this->assertSame(1, $user->titleAwards()->whereHas('title', fn ($query) => $query->where('title_key', 'member-7-number-one-fan'))->count());
+    }
+
+    public function test_different_users_share_one_catalog_record_for_the_same_title(): void
+    {
+        $firstUser = User::factory()->create();
+        $secondUser = User::factory()->create();
+
+        $firstUser->awardTitle('song-expert', 'Song Expert');
+        $secondUser->awardTitle('song-expert', 'Song Expert');
+
+        $this->assertSame(1, \App\Models\Title::where('title_key', 'song-expert')->count());
+        $this->assertSame(1, $firstUser->titleAwards()->count());
+        $this->assertSame(1, $secondUser->titleAwards()->count());
+        $this->assertSame(
+            $firstUser->titleAwards()->value('title_id'),
+            $secondUser->titleAwards()->value('title_id'),
+        );
     }
 
     public function test_personality_quiz_results_award_titles_from_their_result(): void
@@ -131,10 +148,7 @@ class ProfileTest extends TestCase
     public function test_awarded_title_can_be_equipped_from_quiz_result_action(): void
     {
         $user = User::factory()->create();
-        $user->titleAwards()->create([
-            'title_key' => 'hyunjin-number-one-fan',
-            'awarded_at' => now(),
-        ]);
+        $user->awardTitle('hyunjin-number-one-fan', "Hyunjin's #1 Fan");
 
         $response = $this->actingAs($user)->patch('/profile/title', [
             'title' => 'hyunjin-number-one-fan',
@@ -147,11 +161,7 @@ class ProfileTest extends TestCase
     public function test_title_equip_action_returns_json_for_the_quiz_result_modal(): void
     {
         $user = User::factory()->create();
-        $user->titleAwards()->create([
-            'title_key' => 'album-21-enjoyer',
-            'title_label' => 'HOP Enjoyer',
-            'awarded_at' => now(),
-        ]);
+        $user->awardTitle('album-21-enjoyer', 'HOP Enjoyer');
 
         $response = $this->actingAs($user)
             ->patchJson('/profile/title', ['title' => 'album-21-enjoyer']);
@@ -164,11 +174,7 @@ class ProfileTest extends TestCase
     {
         $user = User::factory()->create(['selected_title' => 'main-title']);
         foreach (['title-one', 'title-two', 'title-three', 'main-title'] as $key) {
-            $user->titleAwards()->create([
-                'title_key' => $key,
-                'title_label' => ucfirst(str_replace('-', ' ', $key)),
-                'awarded_at' => now(),
-            ]);
+            $user->awardTitle($key, ucfirst(str_replace('-', ' ', $key)));
         }
 
         $response = $this->actingAs($user)->patch('/profile/showcase-titles', [
@@ -188,11 +194,7 @@ class ProfileTest extends TestCase
     {
         $user = User::factory()->create();
         foreach (['main-title', 'showcase-one', 'showcase-two'] as $key) {
-            $user->titleAwards()->create([
-                'title_key' => $key,
-                'title_label' => ucfirst(str_replace('-', ' ', $key)),
-                'awarded_at' => now(),
-            ]);
+            $user->awardTitle($key, ucfirst(str_replace('-', ' ', $key)));
         }
 
         $this->actingAs($user)->patch('/profile', [
@@ -212,11 +214,7 @@ class ProfileTest extends TestCase
     {
         $user = User::factory()->create(['selected_title' => 'main-title']);
         foreach (['main-title', 'title-one', 'title-two', 'title-three', 'title-four'] as $key) {
-            $user->titleAwards()->create([
-                'title_key' => $key,
-                'title_label' => ucfirst(str_replace('-', ' ', $key)),
-                'awarded_at' => now(),
-            ]);
+            $user->awardTitle($key, ucfirst(str_replace('-', ' ', $key)));
         }
 
         $this->actingAs($user)->from('/profile/edit')

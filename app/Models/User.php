@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasMany as HasManyRelation;
 use App\Models\Role;
+use App\Models\Title;
 
 class User extends Authenticatable
 {
@@ -106,10 +107,10 @@ class User extends Authenticatable
 
     public function unlockedTitles(): array
     {
-        $awardedTitles = $this->titleAwards()->get()->mapWithKeys(function (UserTitle $award) {
-            $label = $award->title_label ?? self::TITLES[$award->title_key]['label'] ?? null;
+        $awardedTitles = $this->titleAwards()->with('title')->get()->mapWithKeys(function (UserTitle $award) {
+            $label = $award->title?->title_label ?? self::TITLES[$award->title?->title_key]['label'] ?? null;
 
-            return $label ? [$award->title_key => ['label' => $label]] : [];
+            return $label ? [$award->title->title_key => ['label' => $label]] : [];
         })->all();
         $completedQuizNames = $this->quizResults()
             ->where('result_type', 'knowledge')
@@ -145,17 +146,30 @@ class User extends Authenticatable
             return null;
         }
 
-        $award = $this->titleAwards()->firstOrCreate(
+        return $this->awardTitle($titleKey, $titleLabel);
+    }
+
+    public function awardTitle(string $titleKey, string $titleLabel): ?UserTitle
+    {
+        $title = Title::firstOrCreate(
             ['title_key' => $titleKey],
-            ['title_label' => $titleLabel, 'awarded_at' => now()],
+            ['title_label' => $titleLabel],
         );
 
-        return $award->wasRecentlyCreated ? $award : null;
+        $award = $this->titleAwards()->firstOrCreate(
+            ['title_id' => $title->id],
+            ['awarded_at' => now()],
+        );
+
+        return $award->wasRecentlyCreated ? $award->load('title') : null;
     }
 
     public function selectedTitleLabel(): ?string
     {
-        return $this->titleAwards()->where('title_key', $this->selected_title)->value('title_label')
+        return $this->titleAwards()
+            ->whereHas('title', fn ($query) => $query->where('title_key', $this->selected_title))
+            ->with('title')
+            ->first()?->title?->title_label
             ?? self::TITLES[$this->selected_title]['label']
             ?? null;
     }

@@ -12,8 +12,7 @@ class UserTitle extends Model
 
     protected $fillable = [
         'user_id',
-        'title_key',
-        'title_label',
+        'title_id',
         'awarded_at',
     ];
 
@@ -27,5 +26,20 @@ class UserTitle extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function title(): BelongsTo
+    {
+        return $this->belongsTo(Title::class);
+    }
+
+    public function getTitleKeyAttribute(): ?string
+    {
+        return $this->title?->title_key;
+    }
+
+    public function getTitleLabelAttribute(): ?string
+    {
+        return $this->title?->title_label;
     }
 }

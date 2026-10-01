@@ -150,12 +150,9 @@ class GuessIdolController extends Controller
         session(['guess_idol_result_saved' => true]);
 
         if ($group && $run['difficulty'] === 'hard' && $run['score'] === $total) {
-            $award = auth()->user()->titleAwards()->firstOrCreate(
-                ['title_key' => 'guess-idol-group-'.$group->id.'-guru'],
-                ['title_label' => "{$group->name} Guru", 'awarded_at' => now()],
-            );
+            $award = auth()->user()->awardTitle('guess-idol-group-'.$group->id.'-guru', "{$group->name} Guru");
 
-            return $award->wasRecentlyCreated ? ['key' => $award->title_key, 'label' => $award->title_label] : null;
+            return $award ? ['key' => $award->title_key, 'label' => $award->title_label] : null;
         }
 
         return null;

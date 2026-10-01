@@ -189,12 +189,9 @@ class GuessSongController extends Controller
         session(['guess_song_result_saved' => true]);
 
         if ($run['score'] === $total * self::TIERS['hard']['points']) {
-            $award = auth()->user()->titleAwards()->firstOrCreate(
-                ['title_key' => 'song-expert'],
-                ['title_label' => 'Song Expert', 'awarded_at' => now()],
-            );
+            $award = auth()->user()->awardTitle('song-expert', 'Song Expert');
 
-            return $award->wasRecentlyCreated ? ['key' => $award->title_key, 'label' => $award->title_label] : null;
+            return $award ? ['key' => $award->title_key, 'label' => $award->title_label] : null;
         }
 
         return null;
