@@ -13,6 +13,7 @@ class QuizResult extends Model
     protected $fillable = [
         'user_id',
         'quiz_id',
+        'attempt_key',
         'quiz_name',
         'result_type',
         'correct_answers',

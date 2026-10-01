@@ -9,6 +9,8 @@ use App\Models\Quiz;
 use App\Models\QuizResult;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class QuizController extends Controller
 {
@@ -46,7 +48,6 @@ class QuizController extends Controller
 
     public function start($id)
     {
-        session()->forget("quiz_result_saved.$id");
         $quiz = Quiz::with('questions.answers')->findOrFail($id);
         $questions = $quiz->questions->shuffle();
 
@@ -54,7 +55,7 @@ class QuizController extends Controller
             return redirect()->route('quizzes.show', $id)->with('error', 'No questions');
         }
 
-        $run = ['quiz_id' => (int) $id, 'questions' => []];
+        $run = ['quiz_id' => (int) $id, 'attempt_key' => (string) Str::uuid(), 'questions' => []];
         foreach ($questions as $question) {
             $run['questions'][] = [
                 'id' => $question->id,
@@ -123,7 +124,6 @@ class QuizController extends Controller
         session(["quiz_run.$id" => ['quiz' => $run, 'index' => $index, 'responses' => $responses]]);
 
         if ($index >= count($run['questions'])) {
-            session(["quiz_ready_to_finalize.$id" => true]);
             return redirect()->route('quizzes.result', $id);
         }
 
@@ -137,9 +137,31 @@ class QuizController extends Controller
             return redirect()->route('quizzes.start', $id);
         }
 
-        $quiz = Quiz::findOrFail($id);
-        $run = $state['quiz'];
+        $run = $state['quiz'] ?? [];
+        $questions = $run['questions'] ?? [];
         $responses = $state['responses'] ?? [];
+        $total = count($questions);
+
+        if ((int) ($run['quiz_id'] ?? 0) !== (int) $id || $total === 0) {
+            session()->forget("quiz_run.$id");
+            return redirect()->route('quizzes.start', $id);
+        }
+
+        if (($state['index'] ?? 0) < $total) {
+            return redirect()->route('quizzes.take', $id);
+        }
+
+        if (($state['index'] ?? 0) !== $total || count($responses) !== $total) {
+            session()->forget("quiz_run.$id");
+            return redirect()->route('quizzes.start', $id);
+        }
+
+        $quiz = Quiz::with('questions.answers')->findOrFail($id);
+        if (! $this->hasValidCompletedResponses($quiz, $run, $responses)) {
+            session()->forget("quiz_run.$id");
+            return redirect()->route('quizzes.start', $id);
+        }
+
         $members = Member::orderBy('name')->get();
         $groups = Group::orderBy('name')->get();
         $albums = Album::orderBy('title')->get();
@@ -163,8 +185,7 @@ class QuizController extends Controller
                 'member_id' => $quiz->member_id,
                 'name' => $memberById->get($quiz->member_id)?->name ?? 'Knowledge result',
             ];
-            $this->saveQuizHistory($quiz, 'percent', $result, $total);
-            $this->updateStats($quiz, 'percent', $result);
+            $quizStats = $this->finalizeQuizResult($quiz, $state, 'percent', $result, $total);
             $newTitleAward = auth()->user()?->awardTitleForQuizResult($quiz, 'percent', $result, $correct, $total);
 
             return view('quizzes.result', [
@@ -172,6 +193,7 @@ class QuizController extends Controller
                 'resultType' => 'percent',
                 'result' => $result,
                 'members' => $members->map->toArray()->all(),
+                'quizStats' => $quizStats,
                 'newTitle' => $this->newTitleData($newTitleAward),
             ]);
         }
@@ -213,8 +235,7 @@ class QuizController extends Controller
             return view('quizzes.result', ['quiz_id' => $id, 'resultType' => null, 'result' => null, 'members' => $members->map->toArray()->all()]);
         }
 
-        $this->saveQuizHistory($quiz, $resultType, $result, count($run['questions']));
-        $quizStats = $this->updateStats($quiz, $resultType, $result);
+        $quizStats = $this->finalizeQuizResult($quiz, $state, $resultType, $result, count($run['questions']));
         $candidates = $this->candidates($run, $resultType, $lookup);
         $newTitleAward = auth()->user()?->awardTitleForQuizResult($quiz, $resultType, $result);
 
@@ -234,6 +255,32 @@ class QuizController extends Controller
         return $award ? ['key' => $award->title_key, 'label' => $award->title_label] : null;
     }
 
+    private function hasValidCompletedResponses(Quiz $quiz, array $run, array $responses): bool
+    {
+        $questions = $quiz->questions->keyBy('id');
+        $runQuestions = $run['questions'] ?? [];
+
+        if ($questions->count() !== count($runQuestions) || count($responses) !== count($runQuestions)) {
+            return false;
+        }
+
+        foreach (array_values($runQuestions) as $index => $runQuestion) {
+            if (! is_array($runQuestion) || ! isset($runQuestion['id'], $runQuestion['answers'], $responses[$index])) {
+                return false;
+            }
+
+            $question = $questions->get((int) $runQuestion['id']);
+            $answerId = (int) $responses[$index];
+            $snapshotHasAnswer = collect($runQuestion['answers'])->contains(fn ($answer) => (int) ($answer['id'] ?? 0) === $answerId);
+
+            if (! $question || ! $snapshotHasAnswer || ! $question->answers->contains('id', $answerId)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     private function spreadMemberScore(array &$scores, $members, $groupId): void
     {
         $groupMembers = $members->where('group_id', $groupId);
@@ -243,50 +290,60 @@ class QuizController extends Controller
         }
     }
 
-    private function saveQuizHistory(Quiz $quiz, string $resultType, object $result, int $total): void
+    private function finalizeQuizResult(Quiz $quiz, array $state, string $resultType, object $result, int $total): array
     {
-        $sessionKey = "quiz_result_saved.{$quiz->id}";
-        if (session()->has($sessionKey) || ! session()->pull("quiz_ready_to_finalize.{$quiz->id}") || ! auth()->check()) {
-            return;
+        if (! auth()->check()) {
+            return $quiz->settings['quiz_stats'] ?? [];
+        }
+
+        $run = $state['quiz'];
+        $correctAnswers = $resultType === 'percent' ? (int) ($result->correct ?? 0) : null;
+        $attemptKey = $run['attempt_key'] ?? null;
+        if (! $attemptKey) {
+            return $quiz->settings['quiz_stats'] ?? [];
         }
 
         $knowledge = $resultType === 'percent';
-        QuizResult::create([
-            'user_id' => auth()->id(),
-            'quiz_id' => $quiz->id,
-            'quiz_name' => $quiz->name,
-            'result_type' => $knowledge ? 'knowledge' : 'personality',
-            'correct_answers' => $knowledge ? (int) ($result->correct ?? 0) : null,
-            'total_questions' => $knowledge ? $total : null,
-            'result_name' => $knowledge ? null : ($result->name ?? $result->title ?? 'Quiz result'),
-            'total_points' => $knowledge ? (int) ($result->percent ?? 0) : 0,
-            'details' => null,
-        ]);
-        session([$sessionKey => true]);
-    }
+        return DB::transaction(function () use ($quiz, $attemptKey, $resultType, $result, $total, $knowledge, $correctAnswers): array {
+            $lockedQuiz = Quiz::query()->lockForUpdate()->findOrFail($quiz->id);
+            $inserted = QuizResult::query()->insertOrIgnore([
+                'user_id' => auth()->id(),
+                'quiz_id' => $quiz->id,
+                'attempt_key' => $attemptKey,
+                'quiz_name' => $quiz->name,
+                'result_type' => $knowledge ? 'knowledge' : 'personality',
+                'correct_answers' => $knowledge ? $correctAnswers : null,
+                'total_questions' => $knowledge ? $total : null,
+                'result_name' => $knowledge ? null : ($result->name ?? $result->title ?? 'Quiz result'),
+                'total_points' => $knowledge ? (int) ($result->percent ?? 0) : 0,
+                'details' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
 
-    private function updateStats(Quiz $quiz, string $resultType, object $result): array
-    {
-        $stats = $quiz->settings['quiz_stats'] ?? [];
-        if (! session()->has("quiz_result_saved.{$quiz->id}")) {
-            return $stats;
-        }
+            $stats = $lockedQuiz->settings['quiz_stats'] ?? [];
+            if ($inserted > 0) {
+                if ($resultType === 'percent') {
+                    $percent = (int) ($result->percent ?? 0);
+                    $bucket = $percent <= 30 ? '0-30' : ($percent <= 60 ? '31-60' : ($percent <= 90 ? '61-90' : '91-100'));
+                    $stats['percent_buckets'][$bucket] = ($stats['percent_buckets'][$bucket] ?? 0) + 1;
+                } else {
+                    $stats[$resultType] ??= [];
+                    $key = (string) ($result->id ?? '');
+                    if ($key !== '') {
+                        $stats[$resultType][$key] = ($stats[$resultType][$key] ?? 0) + 1;
+                    }
+                }
 
-        if ($resultType === 'percent') {
-            $percent = (int) ($result->percent ?? 0);
-            $bucket = $percent <= 30 ? '0-30' : ($percent <= 60 ? '31-60' : ($percent <= 90 ? '61-90' : '91-100'));
-            $stats['percent_buckets'][$bucket] = ($stats['percent_buckets'][$bucket] ?? 0) + 1;
-        } else {
-            $key = (string) ($result->id ?? '');
-            if ($key !== '') {
-                $stats[$resultType][$key] = ($stats[$resultType][$key] ?? 0) + 1;
+                $settings = $lockedQuiz->settings ?? [];
+                $settings['quiz_stats'] = $stats;
+                $lockedQuiz->update(['settings' => $settings]);
             }
-        }
 
-        $settings = $quiz->settings ?? [];
-        $settings['quiz_stats'] = $stats;
-        $quiz->update(['settings' => $settings]);
-        return $stats;
+            $quiz->setAttribute('settings', $lockedQuiz->settings);
+
+            return $lockedQuiz->settings['quiz_stats'] ?? [];
+        });
     }
 
     private function candidates(array $run, string $type, array $lookup): array
