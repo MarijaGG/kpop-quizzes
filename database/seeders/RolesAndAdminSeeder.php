@@ -20,8 +20,13 @@ class RolesAndAdminSeeder extends Seeder
             Role::firstOrCreate(['name' => $r['name']], ['label' => $r['label']]);
         }
 
-        $adminEmail = env('ADMIN_EMAIL', 'admin@example.com');
-        $adminPassword = env('ADMIN_PASSWORD', 'password');
+        $adminEmail = env('ADMIN_EMAIL');
+        $adminPassword = env('ADMIN_PASSWORD');
+
+        if (! $adminEmail || ! $adminPassword) {
+            $this->command?->warn('Admin account was not created: set ADMIN_EMAIL and ADMIN_PASSWORD in the environment first.');
+            return;
+        }
 
         $admin = User::firstOrCreate(
             ['email' => $adminEmail],

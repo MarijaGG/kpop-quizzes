@@ -31,21 +31,21 @@ class StaticApiController extends Controller
 	public function list(Request $request, $resource = null)
 	{
 		if ($resource === null) {
-			return response()->json($this->all());
+			return response()->json($this->all($request));
 		}
 
 		$model = $this->model($resource);
 
-		return response()->json($model::query()->get()->map(fn ($item) => $this->format($resource, $item)));
+		return response()->json($model::query()->get()->map(fn ($item) => $this->format($resource, $item, $request)));
 	}
 
-	public function show($resource, $id)
+	public function show(Request $request, $resource, $id)
 	{
 		$model = $this->model($resource);
 		$item = $model::find($id);
 
 		return $item
-			? response()->json($this->format($resource, $item))
+			? response()->json($this->format($resource, $item, $request))
 			: response()->json(null, 404);
 	}
 
@@ -53,7 +53,7 @@ class StaticApiController extends Controller
 	{
 		$item = ($this->model($resource))::create($this->attrs($resource, $request, false));
 
-		return response()->json($this->format($resource, $item), 201);
+		return response()->json($this->format($resource, $item, $request), 201);
 	}
 
 	public function update(Request $request, $resource, $id)
@@ -67,7 +67,7 @@ class StaticApiController extends Controller
 
 		$item->update($this->attrs($resource, $request, true));
 
-		return response()->json($this->format($resource, $item->fresh()));
+		return response()->json($this->format($resource, $item->fresh(), $request));
 	}
 
 	public function destroy($resource, $id)
@@ -91,12 +91,12 @@ class StaticApiController extends Controller
 		return self::MODELS[$resource];
 	}
 
-	private function all(): array
+	private function all(Request $request): array
 	{
 		$out = [];
 
 		foreach (self::MODELS as $name => $model) {
-			$out[$name] = $model::all()->map(fn ($item) => $this->format($name, $item))->values()->all();
+			$out[$name] = $model::all()->map(fn ($item) => $this->format($name, $item, $request))->values()->all();
 		}
 
 		return $out;
@@ -178,9 +178,19 @@ class StaticApiController extends Controller
 		};
 	}
 
-	private function format(string $resource, object $item): array
+	private function format(string $resource, object $item, Request $request): array
 	{
 		$data = $item->toArray();
+
+		if (! $request->user()->isAdmin()) {
+			// Scoring internals are admin-only: answer meta/points, question meta, quiz settings.
+			return match ($resource) {
+				'answers' => array_intersect_key($data, array_flip(['id', 'question_id', 'text', 'created_at', 'updated_at'])),
+				'questions' => array_intersect_key($data, array_flip(['id', 'quiz_id', 'text', 'order', 'created_at', 'updated_at'])),
+				'quizzes' => array_intersect_key($data, array_flip(['id', 'group_id', 'member_id', 'name', 'image', 'created_at', 'updated_at'])),
+				default => $data,
+			};
+		}
 
 		if ($resource === 'answers') {
 			$meta = $data['meta'] ?? [];
