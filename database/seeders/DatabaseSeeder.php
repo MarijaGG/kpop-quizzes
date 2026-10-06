@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call(ApiDataSeeder::class);
+        $this->call(GameContentSeeder::class);
         $this->call(\Database\Seeders\RolesAndAdminSeeder::class);
     }
 }

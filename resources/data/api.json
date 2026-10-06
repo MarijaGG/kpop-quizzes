@@ -51,7 +51,7 @@
             "concept": "Pirates, adventurous, free, loud, youthful",
             "about": "ATEEZ (\uc5d0\uc774\ud2f0\uc988), known pre-debut as KQ Fellaz, is a 8-member boy group under KQ Entertainment. The group consists of: Seonghwa, Hongjoong, Yunho, Yeosang, San, Mingi, Wooyoung, and Jongho. The group debuted on October 24, 2018 with their first mini album, Treasure Ep.1: All to Zero. They are also signed to the Japanese record label Nippon Columbia since 2019.",
             "description": "You\u2019re someone who is adventurous, passionate, and determined to create your own path. Like ATEEZ, you aren\u2019t afraid of the unknown and would rather chase an exciting dream than stay somewhere comfortable. You value the people who journey alongside you. You have an intense side that pushes you to keep going when things get difficult, but you also have a playful and warm side that makes the journey more meaningful.",
-            "image": "images\/groups\/s2T7wCtiP53J8w32UvLpKsvnA9UDozFEtVy19fDs.jpg",
+            "image": null,
             "id": 6
         }
     ],
@@ -96,7 +96,7 @@
             "group_id": "3",
             "member_id": null,
             "name": "Which Stray Kids Member Are You?",
-            "image": "images\/quizzes\/u45OGhhTkuvFKOhEBz0Fyqpv7BCK6ULs7JixD6lZ.webp"
+            "image": null
         },
         {
             "id": 8,
@@ -138,7 +138,7 @@
             "group_id": "6",
             "member_id": null,
             "name": "Which ATEEZ member are you?",
-            "image": "images\/quizzes\/EKARjyn1vCSqZTL6WaEJSEnbDR4hARhpFBzBoQ73.jpg"
+            "image": null
         }
     ],
     "questions": [
@@ -6862,7 +6862,7 @@
             "name": "Hongjoong",
             "about": "Kim Hong-joong, born on November 7, 1998, is the captain, main rapper, vocalist, composer, and center. He was the first member to join KQ Entertainment and is known for his leadership, creativity, music production, and strong sense of individuality. He enjoys listening to music and composing and is also interested in fashion and photography.",
             "description": "You\u2019re someone who naturally takes the lead while still wanting everyone around you to feel included. Like Hongjoong, you\u2019re creative, ambitious, and never afraid to do things your own way. You care deeply about the people around you and tend to put a lot of thought into whatever you create. You have a strong sense of identity and aren\u2019t satisfied with simply following the crowd. Whether you\u2019re chasing a dream, expressing yourself through art, or encouraging your friends, you bring determination and personality into everything you do.",
-            "image": "images\/members\/T8k8ZH0zYWbTvDDmGDEcmZbEy6hBrB8TH212zJQL.jpg",
+            "image": null,
             "traits": [
                 "Creative",
                 "Ambitious",
@@ -6877,7 +6877,7 @@
             "name": "Seonghwa",
             "about": "Park Seong-hwa, born on April 3, 1998, is a vocalist, rapper, performer, and visual, as well as the oldest member. He is known for being caring and comforting toward the other members and is often associated with keeping things organized. Outside of performing, he enjoys watching dramas, building action figures, playing games, cleaning, and ASMR.",
             "description": "You\u2019re someone who brings a sense of comfort wherever you go. Like Seonghwa, you can be gentle and caring while still having a powerful and expressive side. You notice the little things, care about the people around you, and often show affection through small acts of thoughtfulness. You may seem calm and elegant at first, but there\u2019s a playful and slightly quirky side underneath. You\u2019re the kind of person people can rely on when they need reassurance, warmth, or simply someone who understands.",
-            "image": "images\/members\/VeyaMTsUrdAcI15avdaZn79Gu8jQmweH46AYJHX2.jpg",
+            "image": null,
             "traits": [
                 "Caring",
                 "Calm",
@@ -6892,7 +6892,7 @@
             "name": "Yunho",
             "about": "Jeong Yun-ho, born on March 23, 1999, is the main dancer and vocalist and is known as one of the group\u2019s biggest sources of energy. He enjoys gaming, sports, and spending time with the members, while his specialties include dancing, singing, and gaming. He is also known for his bright personality and encouraging attitude.",
             "description": "You\u2019re someone who makes life feel more fun just by being around. Like Yunho, you have a naturally bright and energetic personality and enjoy sharing your excitement with the people around you. You\u2019re competitive when something matters to you, but you don\u2019t need to take yourself too seriously. You value friendship, teamwork, and making the most out of every experience. Even when things don\u2019t go perfectly, you keep moving forward and try your best rather than worrying about being the best.",
-            "image": "images\/members\/ulbrrJan67XbCUI82BWAbkunQ3dLNRZeXPjSFgMv.jpg",
+            "image": null,
             "traits": [
                 "Energetic",
                 "Cheerful",
@@ -6907,7 +6907,7 @@
             "name": "Yeosang",
             "about": "Kang Yeo-sang, born on June 15, 1999, is a vocalist, performer, rapper, and visual. He is known for his distinctive appearance, calm personality, and unique interests. He enjoys gaming and eating chicken, while his specialties include flying drones and skateboarding. He also created his own character, Hehetmon.",
             "description": "You\u2019re someone who doesn\u2019t need to be the loudest person in the room to stand out. Like Yeosang, you have your own way of doing things and don\u2019t always feel the need to explain yourself to everyone. You can be quiet and observant, but there\u2019s a surprisingly playful and unusual side to you once people get to know you. You value your individuality and prefer to follow your own path rather than simply doing what everyone else expects. There\u2019s something effortlessly intriguing about you that makes people want to know more.",
-            "image": "images\/members\/kUO97NK9UXN8bBvDP8DxvD4ATK8N6G4BlC7fIoQ6.jpg",
+            "image": null,
             "traits": [
                 "Quiet",
                 "independent",
@@ -6922,7 +6922,7 @@
             "name": "San",
             "about": "Choi San, born on July 10, 1999, is the main dancer and lead vocalist. He is known for his powerful performances, expressive stage presence, and energetic personality. Outside of performing, he enjoys sleeping and sports, and he has a strong interest in plushies. He is also a Taekwondo black belt and is often described as one of the group\u2019s mood makers.",
             "description": "You\u2019re someone who feels everything deeply and isn\u2019t afraid to show it. Like San, you can bring incredible intensity and passion when you care about something, but you also have a soft and affectionate side that makes people feel comfortable around you. You\u2019re expressive, energetic, and often become the person who lifts everyone\u2019s mood. Beneath your confidence is a genuinely warm heart, and you care more about the people you love than you sometimes let on.",
-            "image": "images\/members\/BrESMJQbe03Ss0gdebtaBScHoRHKFMmsHDT1Fsmf.jpg",
+            "image": null,
             "traits": [
                 "Passionate",
                 "Affectionate",
@@ -6937,7 +6937,7 @@
             "name": "Mingi",
             "about": "Song Min-gi, born on August 9, 1999, is the main rapper, main dancer, and vocalist. He has a strong interest in music and writing and is known for his distinctive rap style and personality. In his free time, he enjoys staying at home, sleeping, and watching anime. He also has a playful side and is known for acting like the youngest member when relaxing with the group.",
             "description": "You\u2019re someone who can be effortlessly cool one moment and completely chaotic the next. Like Mingi, you have a strong personality and a creative mind, but you also know how to relax and enjoy the simple things. You may seem intimidating from a distance, but people who know you well see your playful and surprisingly soft side. You have your own way of expressing yourself and aren\u2019t afraid to stand out. When you care about something, your confidence and determination become impossible to ignore.",
-            "image": "images\/members\/XbVTNYYRPip8tUzFXa3TIwp60p5qfNVpfFRZ38sQ.jpg",
+            "image": null,
             "traits": [
                 "Confident",
                 "Playful",
@@ -6952,7 +6952,7 @@
             "name": "Wooyoung",
             "about": "Jung Woo-young, born on November 26, 1999, is the main dancer and vocalist. He is known for his energetic personality, strong performance skills, and playful relationship with the other members. He enjoys collecting clothes and gaming, and he has several close friendships within the idol industry. His motto is \u201cLet\u2019s be happy.",
             "description": "You\u2019re someone who refuses to let life become boring. Like Wooyoung, you\u2019re expressive, energetic, and naturally drawn toward people. You love making others laugh, teasing your friends, and turning ordinary moments into memorable ones. At the same time, your playful personality comes with a very loyal heart\u2014you care deeply about the people close to you and value friendships that last. You\u2019re confident in who you are, and your energy tends to make people feel like they can be themselves around you.",
-            "image": "images\/members\/SMaf920AS0EOwdE4dv0o8npaJzeAqvdaBnHylDDY.jpg",
+            "image": null,
             "traits": [
                 "Playful",
                 "Outgoing",
@@ -6967,7 +6967,7 @@
             "name": "Jongho",
             "about": "Choi Jong-ho, born on October 12, 2000, is the  main vocalist and maknae. He is known for his exceptionally powerful vocals and physical strength, with specialties ranging from singing and acting to soccer and even splitting apples. He enjoys playing pool and racing games and has a strong, determined personality.",
             "description": "You\u2019re someone who keeps going even when things get difficult. Like Jongho, you have a strong inner determination and don\u2019t give up easily once you\u2019ve decided what you want. You may appear calm and reserved, but there\u2019s an incredible amount of strength underneath. You prefer proving yourself through your actions rather than simply talking about what you can do. You\u2019re dependable, focused, and willing to push yourself beyond your limits\u2014and your mindset is simple: don\u2019t be afraid of something you haven\u2019t even tried yet.",
-            "image": "images\/members\/HbYN13eqNz4TpxstEbudpTfTkDxpTFEENt2wLuBS.jpg",
+            "image": null,
             "traits": [
                 "Strong",
                 "Determined",

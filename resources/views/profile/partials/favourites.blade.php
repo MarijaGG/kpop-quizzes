@@ -19,7 +19,11 @@
                         @if(isset($items[$position]))
                             @php($item = $items[$position])
                             <article class="favourite-ranked-card favourite-rank-{{ $position }}">
-                                <img src="{{ asset('storage/'.$item['image']) }}" alt="{{ $item['name'] ?? $item['title'] }}">
+                                @if(!empty($item['image']))
+                                    <img src="{{ asset('storage/'.$item['image']) }}" alt="{{ $item['name'] ?? $item['title'] }}">
+                                @else
+                                    <div class="favourite-image-placeholder" aria-hidden="true">{{ strtoupper(substr($item['name'] ?? $item['title'] ?? '?', 0, 1)) }}</div>
+                                @endif
                                 <div class="favourite-ranked-copy">
                                     <span class="favourite-rank">#{{ $position }}</span>
                                     <h3>{{ $item['name'] ?? $item['title'] }}</h3>

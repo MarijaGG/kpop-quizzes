@@ -6,6 +6,7 @@ use App\Models\Quiz;
 use Database\Seeders\ApiDataSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class QuizDataSeederTest extends TestCase
@@ -36,5 +37,23 @@ class QuizDataSeederTest extends TestCase
             $question = DB::table('questions')->find($sourceAnswer['question_id']);
             $this->assertNotNull($question, "Answer {$sourceAnswer['id']} must reference an imported question.");
         }
+
+        foreach (['groups', 'members', 'albums', 'quizzes'] as $type) {
+            foreach ($data[$type] as $record) {
+                $image = $record['image'] ?? null;
+                $this->assertTrue(
+                    $image === null || Storage::disk('public')->exists($image),
+                    "{$type} record {$record['id']} must not reference a missing image."
+                );
+            }
+        }
+    }
+
+    public function test_public_storage_is_not_a_plain_duplicate_media_directory(): void
+    {
+        $path = public_path('storage');
+        $this->assertTrue(is_link($path), 'public/storage must be a Laravel public disk link.');
+        $this->assertSame(storage_path('app/public'), realpath($path));
+        $this->assertSame(realpath($path), realpath(storage_path('app/public')));
     }
 }

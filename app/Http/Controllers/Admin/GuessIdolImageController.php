@@ -55,7 +55,6 @@ class GuessIdolImageController extends BaseAdminController
     {
         $data = $this->validateImage($request);
         $data['image'] = $request->file('image')->store('images/guess-idol', 'public');
-        $this->publishImage($data['image']);
         GuessIdolImage::create($data);
 
         return redirect()->route('admin.guess-idol-images.index')->with('success', 'Guess Idol image added.');
@@ -75,9 +74,7 @@ class GuessIdolImageController extends BaseAdminController
         $data = $this->validateImage($request, false);
         if ($request->hasFile('image')) {
             Storage::disk('public')->delete($guessIdolImage->image);
-            $this->deletePublishedImage($guessIdolImage->image);
             $data['image'] = $request->file('image')->store('images/guess-idol', 'public');
-            $this->publishImage($data['image']);
         }
         $guessIdolImage->update($data);
 
@@ -87,7 +84,6 @@ class GuessIdolImageController extends BaseAdminController
     public function destroy(GuessIdolImage $guessIdolImage)
     {
         Storage::disk('public')->delete($guessIdolImage->image);
-        $this->deletePublishedImage($guessIdolImage->image);
         $guessIdolImage->delete();
         return redirect()->route('admin.guess-idol-images.index')->with('success', 'Guess Idol image deleted.');
     }
@@ -118,23 +114,5 @@ class GuessIdolImageController extends BaseAdminController
             }
         }
         return 'Unknown';
-    }
-
-    private function publishImage(string $path): void
-    {
-        $source = storage_path('app/public/'.$path);
-        $destination = public_path('storage/'.$path);
-        if (! is_dir(dirname($destination))) {
-            mkdir(dirname($destination), 0755, true);
-        }
-        copy($source, $destination);
-    }
-
-    private function deletePublishedImage(string $path): void
-    {
-        $destination = public_path('storage/'.$path);
-        if (is_file($destination)) {
-            unlink($destination);
-        }
     }
 }

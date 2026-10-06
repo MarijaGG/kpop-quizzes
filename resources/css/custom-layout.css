@@ -208,10 +208,12 @@
 .favourite-ranked-group .favourite-rank-1 { width: 100%; }
 .favourite-ranked-card { position: relative; overflow: hidden; isolation: isolate; border-radius: .5rem; background: rgba(255,255,255,.55); }
 .favourite-ranked-card img { display: block; width: 100%; object-fit: cover; }
-.favourite-ranked-group img { aspect-ratio: 4 / 3; }
-.favourite-ranked-group .favourite-rank-1 img { aspect-ratio: 4 / 3; }
-.favourite-ranked-group .favourite-rank-2 img, .favourite-ranked-group .favourite-rank-3 img { aspect-ratio: 16 / 9; }
-.favourite-ranked-member img { aspect-ratio: 1; }
+.favourite-image-placeholder { display: flex; align-items: center; justify-content: center; width: 100%; aspect-ratio: 1; background: linear-gradient(145deg, rgba(166,58,80,.2), rgba(161,103,74,.14)); color: var(--brand-1); font-size: 2rem; font-weight: 800; }
+.favourite-ranked-group img, .favourite-ranked-group .favourite-image-placeholder { aspect-ratio: 4 / 3; }
+.favourite-ranked-group .favourite-rank-1 img, .favourite-ranked-group .favourite-rank-1 .favourite-image-placeholder { aspect-ratio: 4 / 3; }
+.favourite-ranked-group .favourite-rank-2 img, .favourite-ranked-group .favourite-rank-2 .favourite-image-placeholder, .favourite-ranked-group .favourite-rank-3 img, .favourite-ranked-group .favourite-rank-3 .favourite-image-placeholder { aspect-ratio: 16 / 9; }
+.favourite-ranked-member img, .favourite-ranked-member .favourite-image-placeholder { aspect-ratio: 1; }
+.favourite-ranked-album .favourite-image-placeholder { aspect-ratio: 1; }
 .favourite-ranked-member .favourite-rank-2, .favourite-ranked-member .favourite-rank-3, .favourite-ranked-album .favourite-rank-2, .favourite-ranked-album .favourite-rank-3 { width: 78%; justify-self: center; }
 .favourite-ranked-album img { aspect-ratio: 1; }
 .favourite-ranked-member, .favourite-ranked-album { max-width: 680px; }

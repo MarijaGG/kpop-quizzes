@@ -85,7 +85,11 @@
                     <label class="avatar-option" data-group="{{ $member['group_id'] ?? '' }}">
                         <input type="radio" name="avatar_member_id" value="{{ $member['id'] }}"
                                @checked((int) old('avatar_member_id', $user->avatar_member_id) === (int) $member['id'])>
-                        <img src="{{ asset('storage/'.$member['image']) }}" alt="{{ $member['name'] }}">
+                        @if(!empty($member['image']))
+                            <img src="{{ asset('storage/'.$member['image']) }}" alt="{{ $member['name'] }}">
+                        @else
+                            <span class="no-avatar-image" aria-hidden="true">{{ strtoupper(substr($member['name'], 0, 1)) }}</span>
+                        @endif
                         <span>{{ $member['name'] }}</span>
                     </label>
                 @endforeach

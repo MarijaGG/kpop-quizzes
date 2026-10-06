@@ -24,7 +24,6 @@ class GuessSongController extends BaseAdminController
     {
         $data = $this->validateSong($request);
         $data['audio'] = $request->file('audio')->store('audio/guess-song', 'public');
-        $this->publishAudio($data['audio']);
         GuessSong::create($data);
 
         return redirect()->route('admin.guess-songs.index')->with('success', 'Song added.');
@@ -40,9 +39,7 @@ class GuessSongController extends BaseAdminController
         $data = $this->validateSong($request, false);
         if ($request->hasFile('audio')) {
             Storage::disk('public')->delete($guessSong->audio);
-            $this->deletePublishedAudio($guessSong->audio);
             $data['audio'] = $request->file('audio')->store('audio/guess-song', 'public');
-            $this->publishAudio($data['audio']);
         }
         $guessSong->update($data);
 
@@ -52,7 +49,6 @@ class GuessSongController extends BaseAdminController
     public function destroy(GuessSong $guessSong)
     {
         Storage::disk('public')->delete($guessSong->audio);
-        $this->deletePublishedAudio($guessSong->audio);
         $guessSong->delete();
 
         return redirect()->route('admin.guess-songs.index')->with('success', 'Song deleted.');
@@ -65,23 +61,5 @@ class GuessSongController extends BaseAdminController
             'artist' => ['required', 'string', 'max:255'],
             'audio' => [$required ? 'required' : 'nullable', 'file', 'mimes:mp3,wav,ogg,m4a', 'max:10240'],
         ]);
-    }
-
-    private function publishAudio(string $path): void
-    {
-        $source = storage_path('app/public/'.$path);
-        $destination = public_path('storage/'.$path);
-        if (! is_dir(dirname($destination))) {
-            mkdir(dirname($destination), 0755, true);
-        }
-        copy($source, $destination);
-    }
-
-    private function deletePublishedAudio(string $path): void
-    {
-        $destination = public_path('storage/'.$path);
-        if (is_file($destination)) {
-            unlink($destination);
-        }
     }
 }
