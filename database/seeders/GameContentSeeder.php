@@ -43,7 +43,7 @@ class GameContentSeeder extends Seeder
         }
 
         foreach ($data['guess_songs'] as $song) {
-            if (! Storage::disk('public')->exists($song['audio'])) {
+            if (! Storage::disk('local')->exists($song['audio'])) {
                 $missingAudio++;
                 continue;
             }

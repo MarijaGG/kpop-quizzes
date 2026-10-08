@@ -14,7 +14,7 @@
             <div class="guess-image-grid">
                 @forelse($songs as $song)
                     <article class="guess-image-card">
-                        <audio controls src="{{ asset('storage/'.$song->audio) }}" style="width:100%;"></audio>
+                        <audio controls src="{{ route('admin.guess-songs.audio', $song) }}" style="width:100%;"></audio>
                         <div class="guess-image-card-copy">
                             <strong>{{ $song->title }}</strong>
                             <span>{{ $song->artist }}</span>

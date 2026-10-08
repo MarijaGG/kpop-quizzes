@@ -22,7 +22,7 @@ class GameContentSeederTest extends TestCase
             ->filter(fn ($image) => Storage::disk('public')->exists($image['image']))
             ->count();
         $expectedSongs = collect($manifest['guess_songs'])
-            ->filter(fn ($song) => Storage::disk('public')->exists($song['audio']))
+            ->filter(fn ($song) => Storage::disk('local')->exists($song['audio']))
             ->count();
 
         $this->seed(ApiDataSeeder::class);
@@ -34,7 +34,7 @@ class GameContentSeederTest extends TestCase
             return Storage::disk('public')->exists($image->image)
                 && Member::whereKey($image->member_id)->where('group_id', $image->group_id)->exists();
         }));
-        $this->assertTrue(GuessSong::query()->get()->every(fn (GuessSong $song) => Storage::disk('public')->exists($song->audio)));
+        $this->assertTrue(GuessSong::query()->get()->every(fn (GuessSong $song) => Storage::disk('local')->exists($song->audio)));
 
         $this->seed(GameContentSeeder::class);
 

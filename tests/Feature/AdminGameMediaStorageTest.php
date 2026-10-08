@@ -37,9 +37,9 @@ class AdminGameMediaStorageTest extends TestCase
         $this->assertStringNotContainsString('/public/storage/', str_replace('\\', '/', Storage::disk('public')->path($image->image)));
     }
 
-    public function test_guess_song_upload_stays_on_public_storage_disk(): void
+    public function test_guess_song_upload_stays_on_private_storage_disk(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
 
         $this->actingAs($this->adminUser())
             ->post(route('admin.guess-songs.store'), [
@@ -50,8 +50,8 @@ class AdminGameMediaStorageTest extends TestCase
             ->assertRedirect(route('admin.guess-songs.index'));
 
         $song = GuessSong::firstOrFail();
-        Storage::disk('public')->assertExists($song->audio);
-        $this->assertStringNotContainsString('/public/storage/', str_replace('\\', '/', Storage::disk('public')->path($song->audio)));
+        Storage::disk('local')->assertExists($song->audio);
+        $this->assertStringNotContainsString('/public/storage/', str_replace('\\', '/', Storage::disk('local')->path($song->audio)));
     }
 
     private function adminUser(): User

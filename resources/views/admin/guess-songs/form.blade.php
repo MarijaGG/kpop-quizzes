@@ -20,7 +20,7 @@
     <div class="mb-3">
         <label class="form-label">Audio file</label>
         @if($editing)
-            <audio controls src="{{ asset('storage/'.$song->audio) }}" style="display:block;margin-bottom:.75rem;width:100%;"></audio>
+            <audio controls src="{{ route('admin.guess-songs.audio', $song) }}" style="display:block;margin-bottom:.75rem;width:100%;"></audio>
         @endif
         <input type="file" name="audio" class="form-control" accept="audio/*" {{ $editing ? '' : 'required' }}>
         @error('audio')<p class="text-red-600 text-sm">{{ $message }}</p>@enderror

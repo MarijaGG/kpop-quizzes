@@ -23,7 +23,7 @@ class GuessSongController extends BaseAdminController
     public function store(Request $request)
     {
         $data = $this->validateSong($request);
-        $data['audio'] = $request->file('audio')->store('audio/guess-song', 'public');
+        $data['audio'] = $request->file('audio')->store('audio/guess-song', 'local');
         GuessSong::create($data);
 
         return redirect()->route('admin.guess-songs.index')->with('success', 'Song added.');
@@ -34,12 +34,22 @@ class GuessSongController extends BaseAdminController
         return view('admin.guess-songs.edit', ['song' => $guessSong]);
     }
 
+    public function audio(GuessSong $guessSong)
+    {
+        abort_unless(Storage::disk('local')->exists($guessSong->audio), 404);
+
+        return Storage::disk('local')->response($guessSong->audio, null, [
+            'Cache-Control' => 'private, no-store, max-age=0',
+            'X-Content-Type-Options' => 'nosniff',
+        ], 'inline');
+    }
+
     public function update(Request $request, GuessSong $guessSong)
     {
         $data = $this->validateSong($request, false);
         if ($request->hasFile('audio')) {
-            Storage::disk('public')->delete($guessSong->audio);
-            $data['audio'] = $request->file('audio')->store('audio/guess-song', 'public');
+            Storage::disk('local')->delete($guessSong->audio);
+            $data['audio'] = $request->file('audio')->store('audio/guess-song', 'local');
         }
         $guessSong->update($data);
 
@@ -48,7 +58,7 @@ class GuessSongController extends BaseAdminController
 
     public function destroy(GuessSong $guessSong)
     {
-        Storage::disk('public')->delete($guessSong->audio);
+        Storage::disk('local')->delete($guessSong->audio);
         $guessSong->delete();
 
         return redirect()->route('admin.guess-songs.index')->with('success', 'Song deleted.');

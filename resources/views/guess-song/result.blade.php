@@ -12,8 +12,10 @@
                     <div class="guess-song-result-item {{ $response['correct'] ? 'is-correct' : 'is-incorrect' }}">
                         <div>
                             <strong>{{ $response['correct'] ? 'Correct' : 'Incorrect' }}</strong>
-                            <div class="guess-song-answer">{{ $response['correct'] ? ($response['guess'] ?: 'Correct answer') : ('Your answer: '.($response['guess'] ?: 'I don\'t know')) }}</div>
-                            @if(!$response['correct'])
+                            @if($response['correct'])
+                                <div class="guess-song-answer"><strong>{{ $response['title'] }} — {{ $response['artist'] }}</strong></div>
+                            @else
+                                <div class="guess-song-answer">Your guess: {{ $response['guess'] ?: 'I don\'t know' }}</div>
                                 <div class="guess-song-answer">Correct answer: <strong>{{ $response['title'] }} — {{ $response['artist'] }}</strong></div>
                             @endif
                         </div>

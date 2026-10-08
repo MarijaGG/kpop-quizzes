@@ -6,6 +6,8 @@ use App\Models\GuessSong;
 use App\Models\QuizResult;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class GuessSongController extends Controller
@@ -28,7 +30,12 @@ class GuessSongController extends Controller
 
     public function start(): RedirectResponse
     {
-        session()->forget(['guess_song_result_saved', 'guess_song_run']);
+        session()->forget([
+            'guess_song_result_saved',
+            'guess_song_run',
+            'guess_song_play_key',
+            'guess_song_play_started_at',
+        ]);
 
         if (GuessSong::count() < self::ROUNDS) {
             return back()->withErrors(['songs' => 'At least '.self::ROUNDS.' songs need to be added before this can be played.']);
@@ -65,14 +72,61 @@ class GuessSongController extends Controller
         $tier = $run['tier'];
 
         return view('guess-song.take', [
-            'audio' => $song['audio'],
             'tier' => $tier,
             'tierSeconds' => self::TIERS[$tier]['seconds'],
             'tierPoints' => self::TIERS[$tier]['points'],
             'index' => $run['index'],
             'total' => count($run['songs']),
-            'titles' => GuessSong::orderBy('title')->pluck('title')->unique()->values()->all(),
         ]);
+    }
+
+    public function search(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'q' => ['required', 'string', 'min:2', 'max:100'],
+        ]);
+        $term = trim($validated['q']);
+
+        if (mb_strlen($term) < 2) {
+            return response()->json([]);
+        }
+
+        $matches = GuessSong::query()
+            ->where(fn ($query) => $query
+                ->where('title', 'like', '%'.$term.'%')
+                ->orWhere('artist', 'like', '%'.$term.'%'))
+            ->orderBy('title')
+            ->limit(8)
+            ->get(['title', 'artist'])
+            ->map(fn (GuessSong $song) => [
+                'title' => $song->title,
+                'artist' => $song->artist,
+            ]);
+
+        return response()->json($matches);
+    }
+
+    public function clip()
+    {
+        $run = session('guess_song_run');
+        $index = $run['index'] ?? null;
+        $song = $run['songs'][$index] ?? null;
+
+        abort_unless($song && isset(self::TIERS[$run['tier'] ?? '']), 404);
+        abort_unless(Storage::disk('local')->exists($song['audio']), 404);
+
+        $playKey = $index.'-'.$run['tier'];
+        if (session('guess_song_play_key') !== $playKey) {
+            session([
+                'guess_song_play_key' => $playKey,
+                'guess_song_play_started_at' => microtime(true),
+            ]);
+        }
+
+        return Storage::disk('local')->response($song['audio'], null, [
+            'Cache-Control' => 'private, no-store, max-age=0',
+            'X-Content-Type-Options' => 'nosniff',
+        ], 'inline');
     }
 
     public function answer(Request $request): RedirectResponse
@@ -95,6 +149,18 @@ class GuessSongController extends Controller
         $correct = ! $isSkip && $this->isCorrectGuess($guess, $song);
 
         if ($correct) {
+            $playKey = $index.'-'.$tier;
+            $startedAt = session('guess_song_play_key') === $playKey
+                ? (float) session('guess_song_play_started_at', 0)
+                : 0.0;
+            $requiredSeconds = self::TIERS[$tier]['seconds'];
+
+            if ($startedAt === 0 || microtime(true) < $startedAt + $requiredSeconds) {
+                return back()->withErrors(['guess' => 'Listen to this tier’s clip before submitting your guess.']);
+            }
+        }
+
+        if ($correct) {
             $run['responses'][] = [
                 'title' => $song['title'],
                 'artist' => $song['artist'],
@@ -104,8 +170,10 @@ class GuessSongController extends Controller
             ];
             $run['index'] = $index + 1;
             $run['tier'] = 'hard';
+            session()->forget(['guess_song_play_key', 'guess_song_play_started_at']);
         } elseif ($isSkip && self::TIERS[$tier]['next']) {
             $run['tier'] = self::TIERS[$tier]['next'];
+            session()->forget(['guess_song_play_key', 'guess_song_play_started_at']);
         } else {
             $run['responses'][] = [
                 'title' => $song['title'],
@@ -116,6 +184,7 @@ class GuessSongController extends Controller
             ];
             $run['index'] = $index + 1;
             $run['tier'] = 'hard';
+            session()->forget(['guess_song_play_key', 'guess_song_play_started_at']);
         }
 
         if ($run['index'] >= count($run['songs'])) {
@@ -162,7 +231,7 @@ class GuessSongController extends Controller
     private function normalize(string $value): string
     {
         $value = mb_strtolower($value);
-        $value = preg_replace('/[^a-z0-9]+/', ' ', $value) ?? '';
+        $value = preg_replace('/[^\p{L}\p{N}]+/u', ' ', $value) ?? '';
         return trim(preg_replace('/\s+/', ' ', $value) ?? '');
     }
 

@@ -52,6 +52,7 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('guess-songs', AdminGuessSongController::class)
             ->parameters(['guess-songs' => 'guessSong'])
             ->except(['show']);
+        Route::get('guess-songs/{guessSong}/audio', [AdminGuessSongController::class, 'audio'])->name('guess-songs.audio');
         // question/answer management for quizzes
         Route::get('quizzes/{quiz}/questions', [App\Http\Controllers\Admin\QuestionController::class, 'index'])->name('quizzes.questions.index');
         Route::get('quizzes/{quiz}/questions/create', [App\Http\Controllers\Admin\QuestionController::class, 'create'])->name('quizzes.questions.create');
@@ -77,6 +78,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/guess-song', [GuessSongController::class, 'index'])->name('guess-song.index');
     Route::post('/guess-song/start', [GuessSongController::class, 'start'])->name('guess-song.start');
     Route::get('/guess-song/take', [GuessSongController::class, 'take'])->name('guess-song.take');
+    Route::get('/guess-song/search', [GuessSongController::class, 'search'])->name('guess-song.search');
+    Route::get('/guess-song/clip', [GuessSongController::class, 'clip'])->name('guess-song.clip');
     Route::post('/guess-song/answer', [GuessSongController::class, 'answer'])->name('guess-song.answer');
     Route::get('/guess-song/result', [GuessSongController::class, 'result'])->name('guess-song.result');
 

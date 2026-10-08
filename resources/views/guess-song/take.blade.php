@@ -7,7 +7,7 @@
             <div class="question-meta">Song {{ $index + 1 }} of {{ $total }}</div>
             <p class="tier-badge" style="margin-top:.5rem;">{{ ucfirst($tier) }} — {{ $tierPoints }} point{{ $tierPoints === 1 ? '' : 's' }}</p>
 
-            <audio id="clip" src="{{ asset('storage/'.$audio) }}" preload="auto"></audio>
+            <audio id="clip" preload="none"></audio>
             <div style="display:flex;align-items:center;gap:.75rem;margin-top:1rem;">
                 <button type="button" id="play-clip" class="btn btn-ghost" style="flex:0 0 auto;">▶ Play ({{ $tierSeconds }}s)</button>
                 <div style="flex:1 1 auto;height:6px;border-radius:999px;background:var(--brand-2);overflow:hidden;">
@@ -15,14 +15,22 @@
                 </div>
             </div>
 
-            <form method="POST" action="{{ route('guess-song.answer') }}" style="margin-top:1.25rem;">
+            <form id="guess-form" method="POST" action="{{ route('guess-song.answer') }}" style="margin-top:1.25rem;">
                 @csrf
-                <div class="favourite-autocomplete" data-autocomplete>
-                    <input type="text" id="guess-input" name="guess" class="favourite-search" style="width:100%;" autocomplete="off" placeholder="Start typing..." required>
-                    <div class="favourite-suggestions" data-suggestions hidden></div>
+                <div class="favourite-autocomplete">
+                    <input type="text" id="guess-input" class="favourite-search" style="width:100%;" autocomplete="off" placeholder="Type a guess and press Enter">
+                    <div id="guess-search-results" class="favourite-suggestions" role="listbox" aria-label="Matching songs" hidden></div>
                 </div>
+                <input type="hidden" id="guess-value" name="guess" value="{{ old('guess') }}">
+                <p id="guess-search-status" class="muted text-sm mt-2" role="status"></p>
+                <div id="selected-guess-option" class="mt-2" aria-live="polite" @if(!old('guess')) hidden @endif>
+                    @if(old('guess'))
+                        <span class="btn btn-ghost">{{ old('guess') }}</span>
+                    @endif
+                </div>
+                @error('guess')<p class="text-red-600 text-sm" style="margin-top:.5rem;">{{ $message }}</p>@enderror
                 <div style="display:flex;gap:.5rem;margin-top:1rem;">
-                    <button type="submit" class="btn btn-primary">Submit guess</button>
+                    <button type="submit" id="submit-guess" class="btn btn-primary">Submit guess</button>
                     <button type="submit" name="skip" value="1" class="btn btn-ghost" formnovalidate>I don't know</button>
                 </div>
             </form>
@@ -34,48 +42,119 @@
         const audio = document.getElementById('clip');
         const button = document.getElementById('play-clip');
         const bar = document.getElementById('clip-progress-bar');
+        const form = document.getElementById('guess-form');
+        const guessInput = document.getElementById('guess-input');
+        const guessValue = document.getElementById('guess-value');
+        const selectedOption = document.getElementById('selected-guess-option');
+        const searchResults = document.getElementById('guess-search-results');
+        const searchStatus = document.getElementById('guess-search-status');
         const seconds = {{ $tierSeconds }};
+        const clipUrl = @json(route('guess-song.clip'));
         let timer = null;
+
+        function showSelectedGuess(value) {
+            guessValue.value = value;
+            selectedOption.replaceChildren();
+            selectedOption.hidden = false;
+
+            const option = document.createElement('span');
+            option.className = 'btn btn-ghost';
+            option.textContent = value;
+
+            const remove = document.createElement('button');
+            remove.type = 'button';
+            remove.className = 'btn btn-ghost';
+            remove.textContent = '×';
+            remove.setAttribute('aria-label', 'Remove selected guess');
+            remove.addEventListener('click', function () {
+                guessValue.value = '';
+                selectedOption.replaceChildren();
+                selectedOption.hidden = true;
+                guessInput.focus();
+            });
+
+            selectedOption.append(option, remove);
+        }
+
+        guessInput.addEventListener('keydown', function (event) {
+            if (event.key !== 'Enter') return;
+            event.preventDefault();
+            const value = guessInput.value.trim();
+            if (!value) return;
+            if (value.length < 2) {
+                searchStatus.textContent = 'Type at least two characters to search.';
+                return;
+            }
+
+            searchStatus.textContent = 'Searching…';
+            searchResults.replaceChildren();
+            searchResults.hidden = true;
+
+            fetch(@json(route('guess-song.search')) + '?q=' + encodeURIComponent(value), {
+                headers: { 'Accept': 'application/json' },
+            }).then(function (response) {
+                if (!response.ok) throw new Error('Search failed');
+                return response.json();
+            }).then(function (matches) {
+                searchStatus.textContent = matches.length ? 'Choose a song:' : 'No matching songs found.';
+                if (!matches.length) return;
+
+                matches.forEach(function (match) {
+                    const option = document.createElement('button');
+                    option.type = 'button';
+                    option.className = 'favourite-suggestion';
+                    option.setAttribute('role', 'option');
+                    option.textContent = `${match.title} — ${match.artist}`;
+                    option.addEventListener('click', function () {
+                        showSelectedGuess(match.title);
+                        guessInput.value = '';
+                        searchResults.replaceChildren();
+                        searchResults.hidden = true;
+                        searchStatus.textContent = '';
+                    });
+                    searchResults.appendChild(option);
+                });
+                searchResults.hidden = false;
+            }).catch(function () {
+                searchStatus.textContent = 'Song search is unavailable. Please try again.';
+            });
+        });
+
+        form.addEventListener('submit', function (event) {
+            if (event.submitter?.name === 'skip' || guessValue.value.trim()) return;
+            event.preventDefault();
+            guessInput.focus();
+        });
+
+        if (guessValue.value.trim()) showSelectedGuess(guessValue.value.trim());
+
         button.addEventListener('click', function () {
-            audio.currentTime = 0;
-            audio.play();
             clearTimeout(timer);
             bar.style.transition = 'none';
             bar.style.width = '0%';
             void bar.offsetWidth;
-            bar.style.transition = `width ${seconds}s linear`;
-            bar.style.width = '100%';
-            timer = setTimeout(function () { audio.pause(); }, seconds * 1000);
-        });
+            button.disabled = true;
 
-        const titles = @json($titles);
-        const autocomplete = document.querySelector('[data-autocomplete]');
-        const input = document.getElementById('guess-input');
-        const suggestions = autocomplete.querySelector('[data-suggestions]');
+            if (!audio.src) {
+                audio.src = clipUrl;
+                audio.load();
+            } else {
+                audio.currentTime = 0;
+            }
 
-        function renderSuggestions() {
-            const query = input.value.trim().toLowerCase();
-            suggestions.innerHTML = '';
-            suggestions.hidden = false;
-
-            titles.filter(title => title.toLowerCase().includes(query)).forEach(function (title) {
-                const suggestion = document.createElement('button');
-                suggestion.type = 'button';
-                suggestion.className = 'favourite-suggestion';
-                suggestion.textContent = title;
-                suggestion.addEventListener('click', function () {
-                    input.value = title;
-                    suggestions.hidden = true;
-                });
-                suggestions.appendChild(suggestion);
+            audio.play().then(function () {
+                bar.style.transition = `width ${seconds}s linear`;
+                bar.style.width = '100%';
+                timer = setTimeout(function () {
+                    audio.pause();
+                    button.disabled = false;
+                }, seconds * 1000);
+            }).catch(function () {
+                button.disabled = false;
+                alert('The audio clip could not be played. Please try again.');
             });
-        }
-
-        input.addEventListener('focus', renderSuggestions);
-        input.addEventListener('input', renderSuggestions);
-        document.addEventListener('click', function (event) {
-            if (!autocomplete.contains(event.target)) suggestions.hidden = true;
         });
+
     });
 </script>
 @endsection
