@@ -1,59 +1,61 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# K-pop Quizzes
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A Laravel web app for K-pop fans to take personality and knowledge quizzes, play short music and image guessing games, and build a profile around their favourite groups and members.
 
-## About Laravel
+## Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- Account registration, login, and email verification
+- Quizzes with saved results, quiz history, and collectible titles
+- **Guess the Idol**, an image-based member guessing game
+- **Guess the Song**, a song clip guessing game
+- Member profiles with favourite groups, members, albums, and title showcases
+- Admin area for managing groups, members, albums, quizzes, questions, and game media
+- Authenticated JSON API for groups, members, albums, quizzes, questions, and answers
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Requirements
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- PHP 8.2 or newer with the extensions required by Laravel
+- Composer
+- Node.js and npm
+- A configured MySQL database
 
-## Learning Laravel
+## Local setup
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+```sh
+git clone https://github.com/MarijaGG/kpop-quizzes.git
+cd kpop-quizzes
+composer install
+cp .env.example .env
+php artisan key:generate
+npm ci
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Configure the MySQL connection in `.env`. The example environment expects a database named `kpopquiz` on `127.0.0.1:3306`; create the database and adjust the credentials for your local MySQL setup.
 
-## Laravel Sponsors
+To create an administrator during seeding, set `ADMIN_EMAIL` and `ADMIN_PASSWORD` in `.env`. The seeder does not create a default admin account if these values are absent.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Then migrate, load the sample data, link public media, and build the frontend:
 
-### Premium Partners
+```sh
+php artisan migrate --seed
+php artisan storage:link
+npm run build
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+Run the app locally with:
 
-## Contributing
+```sh
+composer run dev
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+This starts the Laravel server, queue listener, log viewer, and Vite development server. By default, the site is available at `http://localhost:8000`.
 
-## Code of Conduct
+The seeders load quiz and catalogue data from `resources/data/api.json` and game entries from `resources/data/game-demo.json`. Guessing-game entries are only imported when their media files are present on the public storage disk. If files are missing, seeding continues and reports how many entries were skipped.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Tests
 
-## Security Vulnerabilities
+The test suite uses an in-memory mySQL database. Run it with:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```sh
+composer test
+```
