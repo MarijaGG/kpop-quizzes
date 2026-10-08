@@ -10,7 +10,6 @@ A Laravel web app for K-pop fans to take personality and knowledge quizzes, play
 - **Guess the Song**, a song clip guessing game
 - Member profiles with favourite groups, members, albums, and title showcases
 - Admin area for managing groups, members, albums, quizzes, questions, and game media
-- Authenticated JSON API for groups, members, albums, quizzes, questions, and answers
 
 ## Requirements
 
@@ -49,8 +48,6 @@ composer run dev
 ```
 
 This starts the Laravel server, queue listener, log viewer, and Vite development server. By default, the site is available at `http://localhost:8000`.
-
-The seeders load quiz and catalogue data from `resources/data/api.json` and game entries from `resources/data/game-demo.json`. Guessing-game entries are only imported when their media files are present on the public storage disk. If files are missing, seeding continues and reports how many entries were skipped.
 
 ## Tests
 
