@@ -43,11 +43,12 @@
             </select>
         </div>
 
-        <h5>10 Questions</h5>
+                <h5>10 question slots</h5>
+                <p class="text-sm text-gray-600 mb-3">New quizzes are saved as drafts. You can add questions and answers before publishing.</p>
         @for($i=0;$i<10;$i++)
             <div class="mb-2">
                 <label class="form-label">Question {{ $i+1 }}</label>
-                <textarea name="questions[]" class="form-control" required></textarea>
+                <textarea name="questions[]" class="form-control"></textarea>
             </div>
         @endfor
 

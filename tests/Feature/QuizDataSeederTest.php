@@ -49,11 +49,15 @@ class QuizDataSeederTest extends TestCase
         }
     }
 
-    public function test_public_storage_is_not_a_plain_duplicate_media_directory(): void
+    public function test_public_storage_link_is_generated_per_installation(): void
     {
         $path = public_path('storage');
-        $this->assertTrue(is_link($path), 'public/storage must be a Laravel public disk link.');
-        $this->assertSame(storage_path('app/public'), realpath($path));
-        $this->assertSame(realpath($path), realpath(storage_path('app/public')));
+        $this->assertStringContainsString('/public/storage', file_get_contents(base_path('.gitignore')));
+        $this->assertStringContainsString('php artisan storage:link', file_get_contents(base_path('README.md')));
+
+        if (file_exists($path) || is_link($path)) {
+            $this->assertTrue(is_link($path), 'public/storage must not be a duplicate media directory.');
+            $this->assertSame(realpath(storage_path('app/public')), realpath($path));
+        }
     }
 }

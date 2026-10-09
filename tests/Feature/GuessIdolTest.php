@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Models\GuessIdolImage;
 use App\Models\Group;
+use App\Models\GuessIdolImage;
 use App\Models\Member;
 use App\Models\QuizResult;
 use App\Models\User;
@@ -41,17 +41,30 @@ class GuessIdolTest extends TestCase
         $this->assertCount(5, collect($run['questions'])->pluck('image_id')->unique());
         $this->assertTrue(collect($run['questions'])->every(fn ($question) => count($question['options']) === 4));
 
-        foreach ($run['questions'] as $question) {
+        $preFinalRun = null;
+        $lastChoice = null;
+        foreach ($run['questions'] as $index => $question) {
+            if ($index === 4) {
+                $preFinalRun = session('guess_idol_run');
+                $lastChoice = $question['correct_member_id'];
+            }
             $this->post(route('guess-idol.answer'), ['choice' => $question['correct_member_id']]);
         }
 
+        $this->assertNotEmpty($preFinalRun['attempt_key']);
+        $this->withSession(['guess_idol_run' => $preFinalRun])
+            ->post(route('guess-idol.answer'), ['choice' => $lastChoice])
+            ->assertRedirect(route('guess-idol.result'));
+
         $this->assertDatabaseHas('quiz_results', [
             'user_id' => $user->id,
+            'quiz_id' => null,
             'result_type' => 'guess_idol',
             'correct_answers' => 5,
             'total_questions' => 5,
         ]);
         $this->assertSame(1, QuizResult::where('user_id', $user->id)->where('result_type', 'guess_idol')->count());
+        $this->assertNotNull(QuizResult::where('user_id', $user->id)->where('result_type', 'guess_idol')->value('attempt_key'));
 
         $this->get(route('guess-idol.result'))->assertOk();
         $this->assertSame(1, QuizResult::where('user_id', $user->id)->where('result_type', 'guess_idol')->count());

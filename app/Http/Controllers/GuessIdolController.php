@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\GuessIdolImage;
 use App\Models\Group;
+use App\Models\GuessIdolImage;
 use App\Models\Member;
 use App\Models\QuizResult;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class GuessIdolController extends Controller
@@ -23,7 +23,7 @@ class GuessIdolController extends Controller
 
     public function start(Request $request): RedirectResponse
     {
-        session()->forget(['guess_idol_result_saved', 'guess_idol_run']);
+        session()->forget('guess_idol_run');
         $validated = $request->validate([
             'group_id' => ['required', 'integer', 'exists:groups,id'],
             'difficulty' => ['required', 'in:easy,medium,hard'],
@@ -45,6 +45,7 @@ class GuessIdolController extends Controller
         $questions = $images->take(5)->map(function (GuessIdolImage $image) use ($members) {
             $otherIds = $members->pluck('id')->reject(fn ($id) => (int) $id === (int) $image->member_id)->shuffle()->take(3)->values()->all();
             $options = collect(array_merge([(int) $image->member_id], array_map('intval', $otherIds)))->shuffle()->values()->all();
+
             return [
                 'image_id' => $image->id,
                 'image' => $image->image,
@@ -55,6 +56,7 @@ class GuessIdolController extends Controller
 
         session([
             'guess_idol_run' => [
+                'attempt_key' => (string) Str::uuid(),
                 'group_id' => (int) $validated['group_id'],
                 'difficulty' => $validated['difficulty'],
                 'questions' => $questions,
@@ -106,10 +108,12 @@ class GuessIdolController extends Controller
             $run['score'] = $correct;
             $run['newTitle'] = $this->saveResult($run);
             session(['guess_idol_run' => $run]);
+
             return redirect()->route('guess-idol.result');
         }
 
         session(['guess_idol_run' => $run]);
+
         return redirect()->route('guess-idol.take');
     }
 
@@ -129,25 +133,31 @@ class GuessIdolController extends Controller
 
     private function saveResult(array $run): ?array
     {
-        if (! auth()->check() || session()->has('guess_idol_result_saved')) {
+        if (! auth()->check() || empty($run['attempt_key'])) {
             return null;
         }
         $group = Group::find($run['group_id']);
         $groupName = $group?->name ?? 'TXT';
         $difficulty = ucfirst($run['difficulty']);
         $total = count($run['questions']);
-        QuizResult::create([
+        $inserted = QuizResult::query()->insertOrIgnore([
             'user_id' => auth()->id(),
-            'quiz_id' => 0,
+            'quiz_id' => null,
+            'attempt_key' => $run['attempt_key'],
             'quiz_name' => "Guess the {$groupName} Member — {$difficulty}",
             'result_type' => 'guess_idol',
             'correct_answers' => $run['score'],
             'total_questions' => $total,
             'result_name' => null,
             'total_points' => $run['score'],
-            'details' => ['difficulty' => $run['difficulty'], 'group_id' => $run['group_id']],
+            'details' => json_encode(['difficulty' => $run['difficulty'], 'group_id' => $run['group_id']]),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
-        session(['guess_idol_result_saved' => true]);
+
+        if ($inserted === 0) {
+            return null;
+        }
 
         if ($group && $run['difficulty'] === 'hard' && $run['score'] === $total) {
             $award = auth()->user()->awardTitle('guess-idol-group-'.$group->id.'-guru', "{$group->name} Guru");
@@ -157,5 +167,4 @@ class GuessIdolController extends Controller
 
         return null;
     }
-
 }

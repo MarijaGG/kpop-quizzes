@@ -32,6 +32,7 @@
             <tr>
                 <th>Image</th>
                 <th>Name</th>
+                <th>Status</th>
                 <th>Group</th>
                 <th>Member</th>
                 <th>Actions</th>
@@ -46,6 +47,15 @@
                     @endif
                 </td>
                 <td>{{ $q->name }}</td>
+                <td>
+                    @if(!$q->is_published)
+                        Draft
+                    @elseif($q->publicationErrors())
+                        Needs completion
+                    @else
+                        Published
+                    @endif
+                </td>
                 <td>{{ $q->group->name ?? '' }}</td>
                 <td>{{ $q->member->name ?? '' }}</td>
                 <td>

@@ -41,6 +41,8 @@ php artisan storage:link
 npm run build
 ```
 
+`public/storage` is generated on each installation by `php artisan storage:link`; it is intentionally not stored in the repository, so it never points to a developer-specific path.
+
 Run the app locally with:
 
 ```sh

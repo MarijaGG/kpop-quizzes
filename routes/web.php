@@ -1,15 +1,15 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\Admin\GroupController;
-use App\Http\Controllers\Admin\MemberController;
 use App\Http\Controllers\Admin\AlbumController;
-use App\Http\Controllers\Admin\QuizController;
-use App\Http\Controllers\Api\StaticApiController;
+use App\Http\Controllers\Admin\GroupController;
 use App\Http\Controllers\Admin\GuessIdolImageController;
 use App\Http\Controllers\Admin\GuessSongController as AdminGuessSongController;
+use App\Http\Controllers\Admin\MemberController;
+use App\Http\Controllers\Admin\QuizController;
+use App\Http\Controllers\Api\StaticApiController;
 use App\Http\Controllers\GuessIdolController;
 use App\Http\Controllers\GuessSongController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -40,7 +40,9 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
-        Route::get('/', function () { return view('admin.index'); })->name('index');
+        Route::get('/', function () {
+            return view('admin.index');
+        })->name('index');
 
         Route::resource('groups', GroupController::class);
         Route::resource('members', MemberController::class);
@@ -83,9 +85,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/guess-song/answer', [GuessSongController::class, 'answer'])->name('guess-song.answer');
     Route::get('/guess-song/result', [GuessSongController::class, 'result'])->name('guess-song.result');
 
-    // Static JSON API (no DB required) — protected
+    // Database-backed JSON API: authenticated reads, administrator-only writes.
     Route::prefix('api')->name('api.')->group(function () {
-        Route::get('/', function () { return response()->json(['ok' => true, 'static' => true]); });
+        Route::get('/', [StaticApiController::class, 'list'])->name('index');
 
         Route::get('{resource?}', [StaticApiController::class, 'list']);
         Route::get('{resource}/{id}', [StaticApiController::class, 'show']);

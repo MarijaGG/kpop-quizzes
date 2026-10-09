@@ -26,4 +26,9 @@ class Member extends Model
     {
         return $this->belongsTo(Group::class);
     }
+
+    public function guessIdolImages()
+    {
+        return $this->hasMany(GuessIdolImage::class);
+    }
 }

@@ -28,6 +28,18 @@
         </div>
 
         <div class="mb-3">
+            <input type="hidden" name="is_published" value="0">
+            <label class="flex items-center gap-2">
+                <input type="checkbox" name="is_published" value="1" {{ old('is_published', $quiz->is_published) ? 'checked' : '' }}>
+                <span>Published</span>
+            </label>
+            <p class="text-sm text-gray-600 mt-1">Publishing requires at least 10 non-empty questions and at least two valid answers per question.</p>
+            @foreach($errors->get('is_published') as $error)
+                <p class="text-red-600 text-sm">{{ $error }}</p>
+            @endforeach
+        </div>
+
+        <div class="mb-3">
             <label class="form-label">Group (optional)</label>
             <select name="group_id" class="form-control">
                 <option value="">--</option>
@@ -57,7 +69,7 @@
             <div class="mb-2">
                 <label class="form-label">Question {{ $i+1 }}</label>
                 <input type="hidden" name="question_ids[{{ $i }}]" value="{{ $existingQuestions[$i]->id ?? '' }}">
-                <textarea name="questions[]" class="form-control" required>{{ old('questions.'.$i, $existingQuestions[$i]->text ?? '') }}</textarea>
+                <textarea name="questions[]" class="form-control">{{ old('questions.'.$i, $existingQuestions[$i]->text ?? '') }}</textarea>
             </div>
         @endfor
 

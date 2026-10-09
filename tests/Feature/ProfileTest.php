@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Models\Group;
+use App\Models\Member;
 use App\Models\Quiz;
 use App\Models\QuizResult;
 use App\Models\User;
@@ -21,6 +23,28 @@ class ProfileTest extends TestCase
             ->get('/profile');
 
         $response->assertOk();
+    }
+
+    public function test_favorites_reject_non_array_inputs_with_validation_errors(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->patchJson('/profile/favourites', [
+                'favorite_groups' => 'not-an-array',
+                'favorite_members' => [null, null, null],
+                'favorite_albums' => [null, null, null],
+            ])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('favorite_groups');
+
+        $this->patchJson('/profile/favourites', [
+            'favorite_groups' => [[], null, null],
+            'favorite_members' => [null, null, null],
+            'favorite_albums' => [null, null, null],
+        ])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('favorite_groups.0');
     }
 
     public function test_profile_information_can_be_updated(): void
@@ -66,7 +90,9 @@ class ProfileTest extends TestCase
     public function test_perfect_niki_quiz_score_unlocks_a_selectable_title(): void
     {
         $user = User::factory()->create();
-        $quiz = Quiz::create(['name' => "How Well Do You Know ENHYPEN's Ni-ki?"]);
+        $group = Group::create(['name' => 'ENHYPEN']);
+        $member = Member::forceCreate(['id' => 7, 'group_id' => $group->id, 'name' => 'Ni-ki']);
+        $quiz = Quiz::create(['name' => 'Ni-ki Knowledge Check', 'member_id' => $member->id]);
         QuizResult::create([
             'user_id' => $user->id,
             'quiz_id' => $quiz->id,
@@ -75,6 +101,7 @@ class ProfileTest extends TestCase
             'correct_answers' => 10,
             'total_questions' => 10,
         ]);
+        $this->assertArrayHasKey('niki-number-one-fan', $user->unlockedTitles());
 
         $response = $this->actingAs($user)->patch('/profile', [
             'name' => $user->name,
@@ -105,15 +132,17 @@ class ProfileTest extends TestCase
     public function test_perfect_quiz_title_is_awarded_only_once(): void
     {
         $user = User::factory()->create();
-        $quiz = Quiz::create(['name' => "How Well Do You Know ENHYPEN's Ni-ki?"]);
+        $group = Group::create(['name' => 'ENHYPEN']);
+        $member = Member::forceCreate(['id' => 7, 'group_id' => $group->id, 'name' => 'Ni-ki']);
+        $quiz = Quiz::create(['name' => 'Renamed Knowledge Quiz', 'member_id' => $member->id]);
 
-        $result = (object) ['member_id' => 7, 'name' => 'Ni-ki'];
+        $result = (object) ['member_id' => $member->id, 'name' => 'Ni-ki'];
         $firstAward = $user->awardTitleForQuizResult($quiz, 'percent', $result, 10, 10);
         $secondAward = $user->awardTitleForQuizResult($quiz, 'percent', $result, 10, 10);
 
         $this->assertNotNull($firstAward);
         $this->assertNull($secondAward);
-        $this->assertSame(1, $user->titleAwards()->whereHas('title', fn ($query) => $query->where('title_key', 'member-7-number-one-fan'))->count());
+        $this->assertSame(1, $user->titleAwards()->whereHas('title', fn ($query) => $query->where('title_key', 'niki-number-one-fan'))->count());
     }
 
     public function test_different_users_share_one_catalog_record_for_the_same_title(): void

@@ -12,6 +12,10 @@ class FavoriteUpdateRequest extends FormRequest
     {
         foreach (['favorite_groups', 'favorite_members', 'favorite_albums'] as $field) {
             $values = $this->input($field, []);
+            if (! is_array($values)) {
+                continue;
+            }
+
             $this->merge([$field => array_map(fn ($value) => $value === '' ? null : $value, $values)]);
         }
     }
@@ -32,8 +36,14 @@ class FavoriteUpdateRequest extends FormRequest
     {
         $validator->after(function ($validator): void {
             foreach (['favorite_groups', 'favorite_members', 'favorite_albums'] as $field) {
-                $values = array_filter($this->input($field, []), fn ($value) => $value !== null);
-                if (count($values) !== count(array_unique($values))) {
+                $values = $this->input($field, []);
+                if (! is_array($values)) {
+                    continue;
+                }
+
+                $values = array_filter($values, fn ($value) => $value !== null && is_scalar($value));
+                $normalized = array_map('strval', $values);
+                if (count($normalized) !== count(array_unique($normalized))) {
                     $validator->errors()->add($field, 'Choose each favourite only once.');
                 }
             }

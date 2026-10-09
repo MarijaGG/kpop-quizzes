@@ -4,10 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\GuessSong;
 use App\Models\QuizResult;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class GuessSongController extends Controller
@@ -31,7 +32,6 @@ class GuessSongController extends Controller
     public function start(): RedirectResponse
     {
         session()->forget([
-            'guess_song_result_saved',
             'guess_song_run',
             'guess_song_play_key',
             'guess_song_play_started_at',
@@ -51,6 +51,7 @@ class GuessSongController extends Controller
 
         session([
             'guess_song_run' => [
+                'attempt_key' => (string) Str::uuid(),
                 'songs' => $songs,
                 'index' => 0,
                 'tier' => 'hard',
@@ -191,10 +192,12 @@ class GuessSongController extends Controller
             $run['score'] = collect($run['responses'])->sum('points');
             $run['newTitle'] = $this->saveResult($run);
             session(['guess_song_run' => $run]);
+
             return redirect()->route('guess-song.result');
         }
 
         session(['guess_song_run' => $run]);
+
         return redirect()->route('guess-song.take');
     }
 
@@ -232,30 +235,37 @@ class GuessSongController extends Controller
     {
         $value = mb_strtolower($value);
         $value = preg_replace('/[^\p{L}\p{N}]+/u', ' ', $value) ?? '';
+
         return trim(preg_replace('/\s+/', ' ', $value) ?? '');
     }
 
     private function saveResult(array $run): ?array
     {
-        if (! auth()->check() || session()->has('guess_song_result_saved')) {
+        if (! auth()->check() || empty($run['attempt_key'])) {
             return null;
         }
 
         $correct = collect($run['responses'])->where('correct', true)->count();
         $total = count($run['songs']);
 
-        QuizResult::create([
+        $inserted = QuizResult::query()->insertOrIgnore([
             'user_id' => auth()->id(),
-            'quiz_id' => 0,
+            'quiz_id' => null,
+            'attempt_key' => $run['attempt_key'],
             'quiz_name' => 'Guess the Song',
             'result_type' => 'guess_song',
             'correct_answers' => $correct,
             'total_questions' => $total,
             'result_name' => null,
             'total_points' => $run['score'],
-            'details' => ['responses' => $run['responses']],
+            'details' => json_encode(['responses' => $run['responses']]),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
-        session(['guess_song_result_saved' => true]);
+
+        if ($inserted === 0) {
+            return null;
+        }
 
         if ($run['score'] === $total * self::TIERS['hard']['points']) {
             $award = auth()->user()->awardTitle('song-expert', 'Song Expert');

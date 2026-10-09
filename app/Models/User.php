@@ -4,13 +4,11 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasMany as HasManyRelation;
-use App\Models\Role;
-use App\Models\Title;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
@@ -20,11 +18,11 @@ class User extends Authenticatable
     public const TITLES = [
         'niki-number-one-fan' => [
             'label' => "Ni-ki's #1 Fan",
-            'quiz_name' => "How Well Do You Know ENHYPEN's Ni-ki?",
+            'member_id' => 7,
         ],
         'hyunjin-number-one-fan' => [
             'label' => "Hyunjin's #1 Fan",
-            'quiz_name' => "How Well Do You Know Stray Kids' Hyunjin?",
+            'member_id' => 16,
         ],
     ];
 
@@ -112,14 +110,23 @@ class User extends Authenticatable
 
             return $label ? [$award->title->title_key => ['label' => $label]] : [];
         })->all();
-        $completedQuizNames = $this->quizResults()
+        $completedMemberQuizIds = $this->quizResults()
             ->where('result_type', 'knowledge')
             ->where('total_questions', '>', 0)
             ->whereColumn('correct_answers', 'total_questions')
-            ->pluck('quiz_name')
+            ->whereHas('quiz', fn ($query) => $query->whereIn('member_id', collect(self::TITLES)->pluck('member_id')))
+            ->with('quiz')
+            ->get()
+            ->map(fn (QuizResult $result) => $result->quiz?->member_id)
+            ->filter()
+            ->map(fn ($memberId) => (int) $memberId)
+            ->unique()
             ->all();
 
-        $legacyTitles = array_filter(self::TITLES, fn (array $title) => in_array($title['quiz_name'], $completedQuizNames, true));
+        $legacyTitles = array_filter(
+            self::TITLES,
+            fn (array $title) => in_array($title['member_id'], $completedMemberQuizIds, true),
+        );
 
         return $awardedTitles + $legacyTitles;
     }
@@ -127,20 +134,23 @@ class User extends Authenticatable
     public function awardTitleForQuizResult(Quiz $quiz, string $resultType, object $result, ?int $correctAnswers = null, ?int $totalQuestions = null): ?UserTitle
     {
         if ($resultType === 'percent') {
-            if (! $totalQuestions || $correctAnswers !== $totalQuestions) {
+            if (! $quiz->member_id || ! $totalQuestions || $correctAnswers !== $totalQuestions) {
                 return null;
             }
 
-            $titleKey = 'member-' . $result->member_id . '-number-one-fan';
+            $titleKey = collect(self::TITLES)
+                ->filter(fn (array $title) => (int) $title['member_id'] === (int) $quiz->member_id)
+                ->keys()
+                ->first() ?? 'member-'.$quiz->member_id.'-number-one-fan';
             $titleLabel = "{$result->name}'s #1 Fan";
         } elseif ($resultType === 'member') {
-            $titleKey = 'member-' . $result->id . '-twin';
+            $titleKey = 'member-'.$result->id.'-twin';
             $titleLabel = "{$result->name}'s Twin";
         } elseif ($resultType === 'album') {
-            $titleKey = 'album-' . $result->id . '-enjoyer';
+            $titleKey = 'album-'.$result->id.'-enjoyer';
             $titleLabel = "{$result->title} Enjoyer";
         } elseif ($resultType === 'group') {
-            $titleKey = 'group-' . $result->id . '-loyalist';
+            $titleKey = 'group-'.$result->id.'-loyalist';
             $titleLabel = "{$result->name} Loyalist";
         } else {
             return null;

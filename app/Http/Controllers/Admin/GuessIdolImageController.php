@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\GuessIdolImage;
 use App\Models\Group;
+use App\Models\GuessIdolImage;
 use App\Models\Member;
+use App\Services\MediaDeletionService;
+use App\Support\UploadedFileReplacement;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class GuessIdolImageController extends BaseAdminController
@@ -29,6 +30,7 @@ class GuessIdolImageController extends BaseAdminController
         $items = $query->get()->map(function (GuessIdolImage $image) use ($groups, $members) {
             $image->group_name = $this->nameFor($groups, $image->group_id);
             $image->member_name = $this->nameFor($members, $image->member_id);
+
             return $image;
         });
         $page = LengthAwarePaginator::resolveCurrentPage();
@@ -54,8 +56,13 @@ class GuessIdolImageController extends BaseAdminController
     public function store(Request $request)
     {
         $data = $this->validateImage($request);
-        $data['image'] = $request->file('image')->store('images/guess-idol', 'public');
-        GuessIdolImage::create($data);
+        UploadedFileReplacement::persist(
+            $request->file('image'),
+            'images/guess-idol',
+            'public',
+            null,
+            fn (string $path) => GuessIdolImage::create(array_merge($data, ['image' => $path])),
+        );
 
         return redirect()->route('admin.guess-idol-images.index')->with('success', 'Guess Idol image added.');
     }
@@ -73,18 +80,24 @@ class GuessIdolImageController extends BaseAdminController
     {
         $data = $this->validateImage($request, false);
         if ($request->hasFile('image')) {
-            Storage::disk('public')->delete($guessIdolImage->image);
-            $data['image'] = $request->file('image')->store('images/guess-idol', 'public');
+            UploadedFileReplacement::persist(
+                $request->file('image'),
+                'images/guess-idol',
+                'public',
+                $guessIdolImage->image,
+                fn (string $path) => $guessIdolImage->update(array_merge($data, ['image' => $path])),
+            );
+        } else {
+            $guessIdolImage->update($data);
         }
-        $guessIdolImage->update($data);
 
         return redirect()->route('admin.guess-idol-images.index')->with('success', 'Guess Idol image updated.');
     }
 
-    public function destroy(GuessIdolImage $guessIdolImage)
+    public function destroy(MediaDeletionService $mediaDeletion, GuessIdolImage $guessIdolImage)
     {
-        Storage::disk('public')->delete($guessIdolImage->image);
-        $guessIdolImage->delete();
+        $mediaDeletion->delete($guessIdolImage);
+
         return redirect()->route('admin.guess-idol-images.index')->with('success', 'Guess Idol image deleted.');
     }
 
@@ -113,6 +126,7 @@ class GuessIdolImageController extends BaseAdminController
                 return $item['name'] ?? $item['title'] ?? 'Unknown';
             }
         }
+
         return 'Unknown';
     }
 }

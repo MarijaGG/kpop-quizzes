@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\GuessSong;
+use App\Services\MediaDeletionService;
+use App\Support\UploadedFileReplacement;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -23,8 +25,13 @@ class GuessSongController extends BaseAdminController
     public function store(Request $request)
     {
         $data = $this->validateSong($request);
-        $data['audio'] = $request->file('audio')->store('audio/guess-song', 'local');
-        GuessSong::create($data);
+        UploadedFileReplacement::persist(
+            $request->file('audio'),
+            'audio/guess-song',
+            'local',
+            null,
+            fn (string $path) => GuessSong::create(array_merge($data, ['audio' => $path])),
+        );
 
         return redirect()->route('admin.guess-songs.index')->with('success', 'Song added.');
     }
@@ -48,18 +55,23 @@ class GuessSongController extends BaseAdminController
     {
         $data = $this->validateSong($request, false);
         if ($request->hasFile('audio')) {
-            Storage::disk('local')->delete($guessSong->audio);
-            $data['audio'] = $request->file('audio')->store('audio/guess-song', 'local');
+            UploadedFileReplacement::persist(
+                $request->file('audio'),
+                'audio/guess-song',
+                'local',
+                $guessSong->audio,
+                fn (string $path) => $guessSong->update(array_merge($data, ['audio' => $path])),
+            );
+        } else {
+            $guessSong->update($data);
         }
-        $guessSong->update($data);
 
         return redirect()->route('admin.guess-songs.index')->with('success', 'Song updated.');
     }
 
-    public function destroy(GuessSong $guessSong)
+    public function destroy(MediaDeletionService $mediaDeletion, GuessSong $guessSong)
     {
-        Storage::disk('local')->delete($guessSong->audio);
-        $guessSong->delete();
+        $mediaDeletion->delete($guessSong);
 
         return redirect()->route('admin.guess-songs.index')->with('success', 'Song deleted.');
     }

@@ -32,4 +32,9 @@ class Group extends Model
     {
         return $this->hasMany(Quiz::class);
     }
+
+    public function guessIdolImages()
+    {
+        return $this->hasMany(GuessIdolImage::class);
+    }
 }

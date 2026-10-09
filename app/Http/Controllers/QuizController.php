@@ -2,12 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Album;
 use App\Models\Group;
-use App\Models\Member;
 use App\Models\Quiz;
 use App\Models\QuizResult;
-use App\Models\User;
+use App\Services\QuizResultDataService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -17,7 +15,7 @@ class QuizController extends Controller
     public function index(Request $request)
     {
         $groupFilter = $request->query('group');
-        $query = Quiz::query()->orderBy('id');
+        $query = Quiz::query()->where('is_published', true)->with('questions.answers')->orderBy('id');
 
         if ($groupFilter === 'none') {
             $query->whereNull('group_id')->whereNull('member_id');
@@ -25,30 +23,48 @@ class QuizController extends Controller
             $query->where('group_id', $groupFilter);
         }
 
+        $quizzes = $query->get()
+            ->filter(fn (Quiz $quiz) => $quiz->publicationErrors() === [])
+            ->values();
+
         return view('quizzes.index', [
-            'quizzes' => $query->get(),
+            'quizzes' => $quizzes,
             'groups' => Group::orderBy('name')->get(),
             'groupFilter' => $groupFilter,
         ]);
     }
 
-    public function show($id)
+    public function show($id, QuizResultDataService $resultData)
     {
-        $quiz = Quiz::findOrFail($id);
+        $quiz = Quiz::where('is_published', true)->findOrFail($id);
+        abort_if($quiz->load('questions.answers')->publicationErrors(), 404);
+
+        $quizStats = $quiz->settings['quiz_stats'] ?? [];
+        $entities = $resultData->forRun([
+            'questions' => $quiz->questions->map(fn ($question) => [
+                'answers' => $question->answers->map(fn ($answer) => [
+                    'target_type' => data_get($answer->meta, 'target_type'),
+                    'target_id' => data_get($answer->meta, 'target_id'),
+                ])->all(),
+            ])->all(),
+        ], $quizStats);
 
         return view('quizzes.show', [
             'quiz' => $quiz,
             'questions_count' => $quiz->questions()->count(),
-            'quizStats' => $quiz->settings['quiz_stats'] ?? [],
-            'members' => Member::orderBy('name')->get(),
-            'groups' => Group::orderBy('name')->get(),
-            'albums' => Album::orderBy('title')->get(),
+            'quizStats' => $quizStats,
+            'members' => $entities['members']->map->toArray()->all(),
+            'groups' => $entities['groups']->map->toArray()->all(),
+            'albums' => $entities['albums']->map->toArray()->all(),
         ]);
     }
 
     public function start($id)
     {
-        $quiz = Quiz::with('questions.answers')->findOrFail($id);
+        $quiz = Quiz::with('questions.answers')->where('is_published', true)->findOrFail($id);
+        if ($errors = $quiz->publicationErrors()) {
+            return redirect()->route('quizzes.index')->with('error', implode(' ', $errors));
+        }
         $questions = $quiz->questions->shuffle();
 
         if ($questions->isEmpty()) {
@@ -63,6 +79,7 @@ class QuizController extends Controller
                 'order' => $question->order,
                 'answers' => $question->answers->shuffle()->map(function ($answer) {
                     $meta = $answer->meta ?? [];
+
                     return [
                         'id' => $answer->id,
                         'text' => $answer->text,
@@ -74,6 +91,7 @@ class QuizController extends Controller
         }
 
         session(["quiz_run.$id" => ['quiz' => $run, 'index' => 0, 'responses' => []]]);
+
         return redirect()->route('quizzes.take', $id);
     }
 
@@ -86,10 +104,7 @@ class QuizController extends Controller
 
         $run = $state['quiz'];
         $index = $state['index'] ?? 0;
-        if (Quiz::findOrFail($id)->questions()->count() !== count($run['questions'])) {
-            session()->forget("quiz_run.$id");
-            return redirect()->route('quizzes.start', $id);
-        }
+        Quiz::findOrFail($id);
         if (! isset($run['questions'][$index])) {
             return redirect()->route('quizzes.result', $id);
         }
@@ -130,7 +145,7 @@ class QuizController extends Controller
         return redirect()->route('quizzes.take', $id);
     }
 
-    public function result($id)
+    public function result($id, QuizResultDataService $resultData)
     {
         $state = session("quiz_run.$id");
         if (empty($state)) {
@@ -144,6 +159,7 @@ class QuizController extends Controller
 
         if ((int) ($run['quiz_id'] ?? 0) !== (int) $id || $total === 0) {
             session()->forget("quiz_run.$id");
+
             return redirect()->route('quizzes.start', $id);
         }
 
@@ -153,28 +169,32 @@ class QuizController extends Controller
 
         if (($state['index'] ?? 0) !== $total || count($responses) !== $total) {
             session()->forget("quiz_run.$id");
+
             return redirect()->route('quizzes.start', $id);
         }
 
-        $quiz = Quiz::with('questions.answers')->findOrFail($id);
-        if (! $this->hasValidCompletedResponses($quiz, $run, $responses)) {
+        $quiz = Quiz::findOrFail($id);
+        if (! $this->hasValidCompletedResponses($run, $responses)) {
             session()->forget("quiz_run.$id");
+
             return redirect()->route('quizzes.start', $id);
         }
 
-        $members = Member::orderBy('name')->get();
-        $groups = Group::orderBy('name')->get();
-        $albums = Album::orderBy('title')->get();
+        $entityData = $resultData->forRun($run, $quiz->settings['quiz_stats'] ?? []);
+        $members = $entityData['members'];
+        $groups = $entityData['groups'];
+        $albums = $entityData['albums'];
         $memberById = $members->keyBy('id');
         $groupById = $groups->keyBy('id');
         $albumById = $albums->keyBy('id');
         $answersById = collect($run['questions'])->flatMap(fn ($question) => $question['answers'])->keyBy('id');
 
-        $knowledgeQuiz = $quiz->member_id && stripos($quiz->name, 'how well do you know') !== false;
+        $knowledgeQuiz = $quiz->member_id !== null;
         if ($knowledgeQuiz) {
             $total = count($run['questions']);
             $correct = collect($responses)->filter(function ($answerId) use ($answersById, $quiz) {
                 $answer = $answersById->get($answerId);
+
                 return ($answer['target_type'] ?? null) === 'member'
                     && (int) ($answer['target_id'] ?? 0) === (int) $quiz->member_id;
             })->count();
@@ -255,12 +275,11 @@ class QuizController extends Controller
         return $award ? ['key' => $award->title_key, 'label' => $award->title_label] : null;
     }
 
-    private function hasValidCompletedResponses(Quiz $quiz, array $run, array $responses): bool
+    private function hasValidCompletedResponses(array $run, array $responses): bool
     {
-        $questions = $quiz->questions->keyBy('id');
         $runQuestions = $run['questions'] ?? [];
 
-        if ($questions->count() !== count($runQuestions) || count($responses) !== count($runQuestions)) {
+        if (count($runQuestions) === 0 || count($responses) !== count($runQuestions)) {
             return false;
         }
 
@@ -269,11 +288,10 @@ class QuizController extends Controller
                 return false;
             }
 
-            $question = $questions->get((int) $runQuestion['id']);
             $answerId = (int) $responses[$index];
             $snapshotHasAnswer = collect($runQuestion['answers'])->contains(fn ($answer) => (int) ($answer['id'] ?? 0) === $answerId);
 
-            if (! $question || ! $snapshotHasAnswer || ! $question->answers->contains('id', $answerId)) {
+            if (! $snapshotHasAnswer) {
                 return false;
             }
         }
@@ -304,6 +322,7 @@ class QuizController extends Controller
         }
 
         $knowledge = $resultType === 'percent';
+
         return DB::transaction(function () use ($quiz, $attemptKey, $resultType, $result, $total, $knowledge, $correctAnswers): array {
             $lockedQuiz = Quiz::query()->lockForUpdate()->findOrFail($quiz->id);
             $inserted = QuizResult::query()->insertOrIgnore([
@@ -365,6 +384,7 @@ class QuizController extends Controller
                 }
             }
         }
+
         return $result;
     }
 }

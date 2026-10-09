@@ -2,11 +2,10 @@
 
 namespace Tests\Feature;
 
-use App\Models\Answer;
-use App\Models\Question;
 use App\Models\Quiz;
 use App\Models\Role;
 use App\Models\User;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -68,6 +67,19 @@ class AdminQuizQuestionTest extends TestCase
             'text' => 'A real question',
             'order' => 1,
         ]);
+    }
+
+    public function test_database_rejects_duplicate_question_order_within_a_quiz(): void
+    {
+        $quiz = Quiz::create(['name' => 'Ordered quiz']);
+        $quiz->questions()->create(['text' => 'First question', 'order' => 1]);
+
+        try {
+            $quiz->questions()->create(['text' => 'Duplicate order', 'order' => 1]);
+            $this->fail('A duplicate question order should violate the unique database constraint.');
+        } catch (QueryException) {
+            $this->assertSame(1, $quiz->questions()->count());
+        }
     }
 
     private function adminUser(): User

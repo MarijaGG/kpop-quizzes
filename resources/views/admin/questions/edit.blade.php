@@ -14,6 +14,10 @@
             <form method="post" action="{{ route('admin.quizzes.questions.update', [$quiz_id, $question->id]) }}" class="max-w-3xl mx-auto">
             @csrf
 
+            @foreach($errors->get('answers') as $error)
+                <p class="text-red-600 text-sm mb-2">{{ $error }}</p>
+            @endforeach
+
             <h5>Answers (up to 8)</h5>
 
         <div class="mb-3">
@@ -31,6 +35,9 @@
             @php $existing = $answers[$i] ?? null; @endphp
             <div class="card mb-2">
                 <div class="card-body">
+                    @if($existing?->id)
+                        <input type="hidden" name="answers[{{ $i }}][id]" value="{{ $existing->id }}" />
+                    @endif
                     <div class="mb-2">
                         <label class="form-label">Answer {{ $i+1 }}</label>
                         <input type="text" name="answers[{{ $i }}][text]" class="form-control" value="{{ old('answers.'.$i.'.text', $existing->text ?? '') }}" />
